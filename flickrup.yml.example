@@ -1,0 +1,4 @@
+watch_dir: "/Users/jpg/Dropbox/Camera Uploads"
+api_key: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+shared_secret: "XXXXXXXXXXXXXXXX"
+archive_dir: "/mnt/archive/PIX"
