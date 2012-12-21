@@ -1,1 +1,4 @@
 flickrup.yml
+*.iml
+.idea/*
+*.gem
