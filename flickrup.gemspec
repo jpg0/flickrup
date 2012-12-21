@@ -6,6 +6,7 @@ Gem::Specification.new do |s|
   s.description = "Flickr auto uploading script"
   s.authors     = ["Jonathan Gilbert"]
   s.email       = 'bb..jgilbert@xoxy.net'
-  s.files       = ["lib/flickrup.rb"]
+  s.files        = Dir["{lib}/**/*.rb", "bin/*", "LICENSE", "*.md"]
+  s.executables << 'flickrup'
   s.homepage    = 'http://bitbucket.org/jgilbert/flickrup'
 end
