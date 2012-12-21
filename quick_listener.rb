@@ -2,7 +2,7 @@ require 'atomic'
 require "thread"
 require "listen"
 
-class Listener
+class QuickListener
 
   def initialize(config)
     @config = config

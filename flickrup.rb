@@ -1,7 +1,7 @@
 require "yaml"
 require "rubygems"
 require "trollop"
-require "listener"
+require "quick_listener"
 
 class Flickrup
 
@@ -9,9 +9,7 @@ class Flickrup
     @config = config
   end
 
-  def run
-    files = Dir["#{@config['watch_dir']}/*.{jpg,JPG,jpeg,JPEG}"]
-
+  def run(files = Dir["#{@config['watch_dir']}/*.{jpg,JPG,jpeg,JPEG}"])
     images = files.map { |x| TaggedImage.new(x) }
 
     tagged = images.select { |x| !(x.tags.nil? || x.tags.empty?) }
@@ -29,13 +27,16 @@ class Flickrup
 end
 
 opts = Trollop::options do
-  opt :once, "Run single pass"                      # flag --once, default false
+  opt :once, "Run single pass" # flag --once, default false
+  opt :nowait, "Upload immediately on change, no delay"
 end
 
 config = YAML::load(File.open('./flickrup.yml', "r"))
 
 if opts.once
   Flickrup.new(config).run
+elsif opts.nowait
+  QuickListener.new(config).run
 else
-  Listener.new(config).run
+  SlowListener.new(config).run
 end
