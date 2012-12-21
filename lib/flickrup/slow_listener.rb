@@ -1,6 +1,18 @@
 require 'rubygems'
 require 'rufus/scheduler'
 
+#modification ->
+#  schedule upload for 5 mins time
+#
+#upload run ->
+#  for files modified > 5 mins ago
+#    -> do upload
+#  if there are files modified < 5 mins ago
+#    -> schedule upload for minimum time
+#
+#When scheduling upload, remove all but the nearest
+#When paused, upload run should be a no-op
+
 class SlowListener
 
   WAIT = 5#*60 #5 min
@@ -8,7 +20,7 @@ class SlowListener
   def initialize(config)
     @config = config
     @scheduler = Rufus::Scheduler.start_new
-    @flickr = Flickrup.new(config)
+    @processor = Processor.new(config)
   end
 
   def run
@@ -25,7 +37,7 @@ class SlowListener
     old, new = files.partition { |x| Time.now > File.mtime(x) + WAIT }
 
     unless old.empty?
-      @flickr.run(old)
+      @processor.run(old)
     end
 
     unless new.empty?

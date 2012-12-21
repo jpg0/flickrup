@@ -1,33 +1,15 @@
 require "yaml"
 require "rubygems"
 require "trollop"
-require "flickr/quick_listener"
-require "flickr/slow_listener"
-require "flickr/tagged_image"
-require "flickr/uploader"
+require "logger"
+require "flickrup/quick_listener"
+require "flickrup/slow_listener"
+require "flickrup/tagged_image"
+require "flickrup/uploader"
+require "flickrup/processor"
+
 
 module Flickrup
-  class Processor
-
-    def initialize(config)
-      @config = config
-    end
-
-    def run(files = Dir["#{@config['watch_dir']}/*.{jpg,JPG,jpeg,JPEG}"])
-      images = files.map { |x| TaggedImage.new(x) }
-
-      tagged = images.select { |x| !(x.tags.nil? || x.tags.empty?) }
-
-      uploader = Uploader.new(@config["api_key"], @config["shared_secret"])
-
-      tagged.each { |x|
-        x.doUpload(uploader)
-        x.archive(@config["archive_dir"])
-      }
-
-      tagged.length
-    end
-  end
 
   @log = Logger.new(STDOUT)
 
@@ -35,13 +17,17 @@ module Flickrup
     @log
   end
 
-  def run_cmd
+  def self.run_cmd(args = ARGV)
     opts = Trollop::options do
       opt :once, "Run single pass" # flag --once, default false
       opt :nowait, "Upload immediately on change, no delay"
+      opt :loglevel, "Logging level", :type => :string, :default => "INFO"
+      opt :config, "Configuration file", :type => :string, :default => './flickrup.yml'
     end
 
-    config = YAML::load(File.open('./flickrup.yml', "r"))
+    @log.sev_threshold = Logger::Severity.const_get(opts.loglevel)
+
+    config = YAML::load(File.open(opts.config, "r"))
 
     if opts.once
       Processor.new(config).run
