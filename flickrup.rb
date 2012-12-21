@@ -2,6 +2,9 @@ require "yaml"
 require "rubygems"
 require "trollop"
 require "quick_listener"
+require "slow_listener"
+require "tagged_image"
+require "uploader"
 
 class Flickrup
 

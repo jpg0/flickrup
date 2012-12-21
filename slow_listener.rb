@@ -3,7 +3,7 @@ require 'rufus/scheduler'
 
 class SlowListener
 
-  WAIT = 5*60 #5 min
+  WAIT = 5#*60 #5 min
 
   def initialize(config)
     @config = config
@@ -35,7 +35,7 @@ class SlowListener
   end
 
   def on_change
-    if scheduler.jobs.empty?
+    if @scheduler.jobs.empty?
       @scheduler.in WAIT do
         do_upload
       end
