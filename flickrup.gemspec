@@ -9,4 +9,11 @@ Gem::Specification.new do |s|
   s.files        = Dir["{lib}/**/*.rb", "bin/*", "LICENSE", "*.md"]
   s.executables << 'flickrup'
   s.homepage    = 'http://bitbucket.org/jgilbert/flickrup'
+  s.add_runtime_dependency 'atomic', '>= 1.0.0'
+  s.add_runtime_dependency 'listen', '>= 0.6.0'
+  s.add_runtime_dependency 'rufus', '>= 2.0.0'
+  s.add_runtime_dependency 'mini_exiftool', '>= 1.6.0'
+  s.add_runtime_dependency 'flickraw', '>= 0.9.6'
+  s.add_runtime_dependency 'trollop', '>= 2.0.0'
+
 end
