@@ -1,8 +1,10 @@
 require 'mini_exiftool'
 require 'ftools'
 require 'fileutils'
+require "flickrup/logging"
 
 class TaggedImage
+  include Logging
 
   attr_reader :file
 

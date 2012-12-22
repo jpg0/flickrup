@@ -1,8 +1,10 @@
 require "yaml"
 require 'rubygems'
 require "flickraw"
+require "flickrup/logging"
 
 class Uploader
+  include Logging
 
   def initialize(api_key, shared_secret)
     FlickRaw.api_key= api_key
@@ -46,7 +48,9 @@ class Uploader
   end
 
   def upload(image, tags)
+    logger.debug("Uploading #{image} with tags #{tags.join(",")}")
     @flickr.upload_photo(image, :tags => tags.join(" "))
+    logger.debug("Uploaded #{image}")
   end
 
 end
