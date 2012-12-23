@@ -25,11 +25,12 @@ module Flickrup
         opt :nowait, "Upload immediately on change, no delay"
         opt :loglevel, "Logging level", :type => :string, :default => "INFO"
         opt :config, "Configuration file", :type => :string, :default => './flickrup.yml'
+        opt :timeout, "Timeout/Wait for file modification", :default => 5*60
       end
 
       logger.level = Logger::Severity.const_get(opts.loglevel)
 
-      config = YAML::load(File.open(opts.config, "r"))
+      config = YAML::load(File.open(opts.config, "r")).merge opts
 
       if opts.once
         Processor.new(config).run
