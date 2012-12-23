@@ -17,7 +17,7 @@ require "flickrup/logging"
 class SlowListener
   include Logging
 
-  WAIT = 5#*60 #5 min
+  WAIT = 5*60 #5 min
 
   def initialize(config)
     @config = config
