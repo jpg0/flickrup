@@ -9,9 +9,18 @@ class Processor
     @config = config
   end
 
+  def paused
+    Dir["#{@config['watch_dir']}/paused"].length > 0
+  end
+
   def run(files = Dir["#{@config['watch_dir']}/*.{jpg,JPG,jpeg,JPEG}"])
 
     logger.debug("Processing #{files.length} files")
+
+    if paused
+      logger.debug("Paused detected, so skipping processing...")
+      return 0
+    end
 
     images = files.map { |x| TaggedImage.new(x) }
 
