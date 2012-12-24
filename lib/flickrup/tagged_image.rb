@@ -22,7 +22,8 @@ class TaggedImage
   end
 
   def archive(to_dir)
-    date_taken = @parsed.date_time_original
+    date_taken = @parsed.date_time_original || @parsed.modifydate
+
     target_dir = File.join(
         to_dir,
         date_taken.strftime("%y"),
