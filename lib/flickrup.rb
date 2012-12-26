@@ -26,6 +26,7 @@ module Flickrup
         opt :loglevel, "Logging level", :type => :string, :default => "INFO"
         opt :config, "Configuration file", :type => :string, :default => './flickrup.yml'
         opt :timeout, "Timeout/Wait for file modification", :default => 5*60
+        opt :dryrun, "Dry run, don't move or upload (useful for debugging)"
       end
 
       logger.level = Logger::Severity.const_get(opts.loglevel)

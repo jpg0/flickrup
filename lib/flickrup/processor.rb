@@ -28,10 +28,15 @@ class Processor
 
     uploader = Uploader.new(@config["api_key"], @config["shared_secret"])
 
-    tagged.each { |x|
-      x.doUpload(uploader)
-      x.archive(@config["archive_dir"])
-    }
+    if @config[:dryrun]
+      logger.info("Would now upload & move #{tagged.length} files, pausing for 5 secs instead")
+      sleep 5
+    else
+      tagged.each { |x|
+        x.doUpload(uploader)
+        x.archive(@config["archive_dir"])
+      }
+    end
 
     logger.debug("Processed #{tagged.length} valid files")
 

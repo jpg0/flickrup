@@ -18,9 +18,9 @@ require "flickrup/logging"
 class SlowListener
   include Logging
 
-  IDLE = -1
-  PROCESSING = 0
-  CHANGES_QUEUED = 1
+  IDLE = 0
+  SCHEDULED = 1
+  PROCESSING = 2
 
   def initialize(config)
     @wait = config[:timeout]
@@ -33,7 +33,7 @@ class SlowListener
 
   def run
     logger.debug("Watching #{@config['watch_dir']}...")
-    Listen.to(@config['watch_dir']) do |modified, added, removed|
+    Listen.to(@config['watch_dir']) do |modified, added, _|
       unless modified.empty? && added.empty?
         on_change
       end
@@ -42,31 +42,27 @@ class SlowListener
 
   def do_upload
     logger.debug("Checking files for upload")
+
+    @processing.set PROCESSING
+
     files = Dir["#{@config['watch_dir']}/*.{jpg,JPG,jpeg,JPEG}"]
 
     old, new = files.partition { |x| Time.now > File.mtime(x) + @wait }
 
-    reschedule = false
+    unless new.empty?
+      logger.debug("Found #{new.length} new files")
+      @processing.set SCHEDULED
+    end
 
     unless old.empty?
       logger.debug("Found #{old.length} stable files")
-      @processing.set PROCESSING
       @processor.run(old)
-      changes = @processing.swap IDLE
-      if changes > 0
-        logger.debug("Changes occurred while processing")
-        reschedule = true
-      end
     end
 
-    unless new.empty?
-      logger.debug("Found #{new.length} new files")
-      reschedule = true
-    end
+    @processing.compare_and_swap(PROCESSING,IDLE)
 
-    if reschedule
+    if @processing.get == SCHEDULED
       logger.debug("Rescheduling...")
-      #todo: schedule for latest
       schedule
     end
   end
@@ -74,27 +70,17 @@ class SlowListener
   def on_change
     logger.debug("Change detected")
 
-    current_state = @processing.get
-    was_processing = @processing.compare_and_swap(PROCESSING, CHANGES_QUEUED)
+    previous_state = @processing.swap(SCHEDULED)
 
-    if was_processing
-      case current_state
-        when IDLE
-          on_change #retry
-        when CHANGES_QUEUED
-          on_change #retry
-        when PROCESSING
-          logger.debug("Scheduling queued") # already queued changes
-      end
-    else #wasn't processing
-      case current_state
-        when IDLE
-          schedule
-        when CHANGES_QUEUED
-          logger.debug("Scheduling already queued") # already queued changes
-        when PROCESSING
-          on_change #retry
-      end
+    case previous_state
+      when SCHEDULED
+        #ignore, already scheduled
+        logger.debug("Already scheduled")
+      when PROCESSING
+        #ignore, processing thread will reschedule
+        logger.debug("Scheduling queued")
+      when IDLE
+        schedule
     end
   end
 
@@ -102,9 +88,7 @@ class SlowListener
     if @scheduler.jobs.empty?
       logger.debug("Scheduling processing for #@wait sec")
       @scheduler.in @wait do
-        if @processing.get == IDLE
-          do_upload
-        end
+        do_upload
       end
     else
       logger.debug("Already scheduled")
