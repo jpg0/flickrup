@@ -32,6 +32,7 @@ class TaggedImage
 
     File.makedirs(target_dir)
     FileUtils.mv(@file, File.join(target_dir, File.basename(@file)))
+    logger.info("Archived #{File.basename(@file)} to #{target_dir}")
   end
 
 end
