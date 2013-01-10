@@ -1,6 +1,9 @@
 require "flickrup/tagged_image"
 require "flickrup/uploader"
 require "flickrup/logging"
+require "flickrup/ext/tag_sets"
+require "flickrup/ext/replacement_tags"
+require "flickrup/ext/machine_tags"
 
 class Processor
   include Logging
@@ -26,7 +29,7 @@ class Processor
 
     tagged = images.select { |x| !(x.tags.nil? || x.tags.empty?) }
 
-    uploader = Uploader.new(@config["api_key"], @config["shared_secret"])
+    uploader = get_uploader
 
     if @config[:dryrun]
       logger.info("Would now upload & move #{tagged.length} files, pausing for 5 secs instead")
@@ -41,5 +44,19 @@ class Processor
     logger.debug("Processed #{tagged.length} valid files")
 
     tagged.length
+  end
+
+  private
+  def get_uploader
+    uploader = Uploader.new(@config["api_key"], @config["shared_secret"])
+
+    uploader = ReplacementTags.new(@config, uploader)
+    uploader = MachineTags.new(@config, uploader)
+
+    if @config[:tagsetprefix]
+      uploader = TagSets.new(@config, uploader)
+    end
+
+    uploader
   end
 end

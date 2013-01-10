@@ -47,10 +47,15 @@ class Uploader
 
   end
 
-  def upload(image, tags)
-    logger.debug("Uploading #{image} with tags #{tags.join(",")}")
-    @flickr.upload_photo(image, :tags => tags.join(" "))
-    logger.debug("Uploaded #{image}")
+  def upload(image, meta, config)
+    logger.debug("Uploading #{image} with tags #{config[:tags]}")
+
+    begin
+      @flickr.upload_photo(image, config)
+      logger.debug("Uploaded #{image}")
+    rescue StandardError => err
+      logger.error("Failed to upload #{image}: #{err}")
+    end
   end
 
 end

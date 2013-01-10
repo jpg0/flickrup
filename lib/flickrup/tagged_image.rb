@@ -18,7 +18,12 @@ class TaggedImage
   end
 
   def doUpload(uploader)
-    uploader.upload(file, tags)
+    uploader.upload(file, self, :tags => tags.join(" "))
+
+    #maybe save afterwards
+    if @parsed.changed?
+      @parsed.save!
+    end
   end
 
   def archive(to_dir)
@@ -33,6 +38,16 @@ class TaggedImage
     File.makedirs(target_dir)
     FileUtils.mv(@file, File.join(target_dir, File.basename(@file)))
     logger.info("Archived #{File.basename(@file)} to #{target_dir}")
+  end
+
+  # Returns the value of a tag.
+  def [] tag
+    @parsed[tag]
+  end
+
+  # Set the value of a tag.
+  def []=(tag, val)
+    @parsed[tag] = val
   end
 
 end
