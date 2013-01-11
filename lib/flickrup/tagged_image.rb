@@ -17,8 +17,18 @@ class TaggedImage
     @parsed.keywords.to_a
   end
 
-  def doUpload(uploader)
-    uploader.upload(file, self, :tags => tags.join(" "))
+  def doUpload(preupload_handlers, uploader)
+
+    config = preupload_handlers.reduce({:tags => tags.join(" ")}) do |config, handler|
+      handler.preupload(file, self, config)
+    end
+
+    #maybe save afterwards
+    if @parsed.changed?
+      @parsed.save!
+    end
+
+    uploader.upload(file, self, config)
 
     #maybe save afterwards
     if @parsed.changed?

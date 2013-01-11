@@ -4,6 +4,7 @@ require "flickrup/logging"
 require "flickrup/ext/tag_sets"
 require "flickrup/ext/replacement_tags"
 require "flickrup/ext/machine_tags"
+require "flickrup/ext/visibility"
 
 class Processor
   include Logging
@@ -36,7 +37,7 @@ class Processor
       sleep 5
     else
       tagged.each { |x|
-        x.doUpload(uploader)
+        x.doUpload(get_preupload_handlers, uploader)
         x.archive(@config[:archive_dir])
       }
     end
@@ -54,13 +55,16 @@ class Processor
 
     uploader = Uploader.new(flickr_client)
 
-    uploader = ReplacementTags.new(@config, uploader, context)
-    uploader = MachineTags.new(@config, uploader, context)
-
-    if @config[:tagsetprefix]
-      uploader = TagSets.new(@config, uploader, context)
+    upload_handlers.reduce(uploader) do |result, clazz|
+      clazz.new(@config, result, context)
     end
-
-    uploader
   end
+
+  def get_preupload_handlers
+    [MachineTags.new(@config, {})]
+  end
+
+  def upload_handlers() [TagSets, Visibility, ReplacementTags] end
+
 end
+

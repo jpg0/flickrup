@@ -1,24 +1,16 @@
-class TagSets
+require "flickrup/ext/prefixed_extension"
+
+class TagSets < PrefixedExtension
   def initialize(config, delegate, context)
-    @config = config
+    super(config)
     @delegate = delegate
     @flickr = context[:flickr_client]
   end
 
   def upload(image, meta, config)
-    all_tags = config[:tags].split(" ")
+    sets = values(:tagsetprefix, config)
 
-    prefix = @config[:tagsetprefix]
-
-    (set_tags, tags) = all_tags.partition do |x|
-      x.start_with?("#{prefix}")
-    end
-
-    sets = set_tags.map do |x|
-      x[(prefix.length)..x.length]
-    end
-
-    uploaded = @delegate.upload(image, meta, config.merge({:tags => tags.join(" ")}))
+    uploaded = @delegate.upload(image, meta, config)
 
     sets.each do |set|
       @flickr.add_to_set(uploaded, set)

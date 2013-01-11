@@ -1,10 +1,9 @@
 class MachineTags
-  def initialize(config, delegate, context)
+  def initialize(config, context)
     @config = config
-    @delegate = delegate
   end
 
-  def upload(image, meta, config)
+  def preupload(image, meta, config)
 
     tags = config[:tags].split(" ")
 
@@ -12,7 +11,13 @@ class MachineTags
       x.sub(/^([^:]+):([^:]+)::/,"\\1:\\2=")
     end
 
-    @delegate.upload(image, meta, config.merge({:tags => remapped.join(" ")}))
+
+    unless tags == remapped #write back to file
+      meta['Keywords'] = remapped
+      meta['Subject'] = remapped #also write Subject XMP tag
+    end
+
+    config.merge({:tags => remapped.join(" ")})
 
   end
 end
