@@ -1,12 +1,12 @@
 class ReplacementTags
-  def initialize(config, delegate)
+  def initialize(config, delegate, context)
     @config = config
     @delegate = delegate
   end
 
   def upload(image, meta, config)
 
-    replacements = @config["tag_replacements"]
+    replacements = @config[:tag_replacements]
 
     if replacements != nil
       replacements.each do |tag_name, tag_value_replacements|

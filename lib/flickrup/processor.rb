@@ -13,10 +13,10 @@ class Processor
   end
 
   def paused
-    Dir["#{@config['watch_dir']}/paused"].length > 0
+    Dir["#{@config[:watch_dir]}/paused"].length > 0
   end
 
-  def run(files = Dir["#{@config['watch_dir']}/*.{jpg,JPG,jpeg,JPEG}"])
+  def run(files = Dir["#{@config[:watch_dir]}/*.{jpg,JPG,jpeg,JPEG}"])
 
     logger.debug("Processing #{files.length} files")
 
@@ -37,7 +37,7 @@ class Processor
     else
       tagged.each { |x|
         x.doUpload(uploader)
-        x.archive(@config["archive_dir"])
+        x.archive(@config[:archive_dir])
       }
     end
 
@@ -48,13 +48,17 @@ class Processor
 
   private
   def get_uploader
-    uploader = Uploader.new(@config["api_key"], @config["shared_secret"])
+    flickr_client = FlickrClient.new(@config[:api_key], @config[:shared_secret])
 
-    uploader = ReplacementTags.new(@config, uploader)
-    uploader = MachineTags.new(@config, uploader)
+    context = {:flickr_client => flickr_client}
+
+    uploader = Uploader.new(flickr_client)
+
+    uploader = ReplacementTags.new(@config, uploader, context)
+    uploader = MachineTags.new(@config, uploader, context)
 
     if @config[:tagsetprefix]
-      uploader = TagSets.new(@config, uploader)
+      uploader = TagSets.new(@config, uploader, context)
     end
 
     uploader

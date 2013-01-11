@@ -27,12 +27,12 @@ module Flickrup
         opt :config, "Configuration file", :type => :string, :default => './flickrup.yml'
         opt :timeout, "Timeout/Wait for file modification", :default => 5*60
         opt :dryrun, "Dry run, don't move or upload (useful for debugging)"
-        opt :tagsetprefix, "Provide tagset support with supplied tag prefix", :type => :string, :default => 'grouping.set'
       end
 
       logger.level = Logger::Severity.const_get(opts.loglevel)
 
-      config = YAML::load(File.open(opts.config, "r")).merge opts
+      #load config, symbolise, merge with command line config
+      config = YAML::load(File.open(opts.config, "r")).inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}.merge opts
 
       if opts.once
         Processor.new(config).run

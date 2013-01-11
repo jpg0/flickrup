@@ -1,5 +1,5 @@
 class MachineTags
-  def initialize(config, delegate)
+  def initialize(config, delegate, context)
     @config = config
     @delegate = delegate
   end

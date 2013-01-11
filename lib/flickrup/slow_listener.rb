@@ -33,7 +33,7 @@ class SlowListener
 
   def run
     logger.debug("Watching #{@config['watch_dir']}...")
-    Listen.to(@config['watch_dir']) do |modified, added, _|
+    Listen.to(@config[:watch_dir]) do |modified, added, _|
       unless modified.empty? && added.empty?
         on_change
       end
@@ -45,7 +45,7 @@ class SlowListener
 
     @processing.set PROCESSING
 
-    files = Dir["#{@config['watch_dir']}/*.{jpg,JPG,jpeg,JPEG}"]
+    files = Dir["#{@config[:watch_dir]}/*.{jpg,JPG,jpeg,JPEG}"]
 
     old, new = files.partition { |x| Time.now > File.mtime(x) + @wait }
 

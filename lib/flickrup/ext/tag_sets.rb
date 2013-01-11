@@ -1,7 +1,8 @@
 class TagSets
-  def initialize(config, delegate)
+  def initialize(config, delegate, context)
     @config = config
     @delegate = delegate
+    @flickr = context[:flickr_client]
   end
 
   def upload(image, meta, config)
@@ -14,10 +15,13 @@ class TagSets
     end
 
     sets = set_tags.map do |x|
-      x[(prefix.length + 1)..x.length]
+      x[(prefix.length)..x.length]
     end
 
-    @delegate.upload(image, meta, config.merge({:tags => tags.join(" ")}))
+    uploaded = @delegate.upload(image, meta, config.merge({:tags => tags.join(" ")}))
 
+    sets.each do |set|
+      @flickr.add_to_set(uploaded, set)
+    end
   end
 end
