@@ -1,6 +1,7 @@
 require 'mini_exiftool'
 require 'fileutils'
 require "flickrup/logging"
+require "flickrup/tag_set"
 
 class TaggedImage
   include Logging
@@ -19,11 +20,12 @@ class TaggedImage
     else
       keywords
     end
+    TagSet.new(keywords)
   end
 
   def doUpload(preupload_handlers, uploader)
 
-    config = preupload_handlers.reduce({:tags => tags.join(" ")}) do |config, handler|
+    config = preupload_handlers.reduce({:tags => tags}) do |config, handler|
       handler.preupload(file, self, config)
     end
 
@@ -49,7 +51,7 @@ class TaggedImage
         date_taken.strftime("%m")
     )
 
-    FileUtils.makedir_p(target_dir)
+    FileUtils.mkdir_p(target_dir)
     FileUtils.mv(@file, File.join(target_dir, File.basename(@file)))
     logger.info("Archived #{File.basename(@file)} to #{target_dir}")
   end

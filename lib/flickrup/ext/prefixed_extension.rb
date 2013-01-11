@@ -4,7 +4,7 @@ class PrefixedExtension
   end
 
   def values(prefix_key, config)
-    all_tags = config[:tags].split(" ")
+    all_tags = config[:tags]
 
     prefix = @config[prefix_key]
 
