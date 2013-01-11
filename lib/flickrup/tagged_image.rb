@@ -1,5 +1,4 @@
 require 'mini_exiftool'
-require 'ftools'
 require 'fileutils'
 require "flickrup/logging"
 
@@ -45,7 +44,7 @@ class TaggedImage
         date_taken.strftime("%m")
     )
 
-    File.makedirs(target_dir)
+    FileUtils.makedir_p(target_dir)
     FileUtils.mv(@file, File.join(target_dir, File.basename(@file)))
     logger.info("Archived #{File.basename(@file)} to #{target_dir}")
   end
