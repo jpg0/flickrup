@@ -41,6 +41,15 @@ module Flickrup
       else
         SlowListener.new(config).run
       end
+
+      # suspend thread so we don't exit immediately
+      @mutex = Mutex.new
+      @running = ConditionVariable.new
+
+      @mutex.synchronize do
+        @running.wait(@mutex)
+      end
+
     end
   end
 end

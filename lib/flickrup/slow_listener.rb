@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'atomic'
+require 'fileutils'
 require 'rufus/scheduler'
 require "flickrup/logging"
 
@@ -32,11 +33,35 @@ class SlowListener
   end
 
   def run
-    logger.debug("Watching #{@config['watch_dir']}...")
-    Listen.to(@config[:watch_dir]) do |modified, added, _|
-      unless modified.empty? && added.empty?
-        on_change
-      end
+    logger.debug("Watching #{@config[:watch_dir]}...")
+    @listener = Listen.to(@config[:watch_dir])
+    @listener.change(&method(:on_change))
+    @listener.start(false)
+
+    logger.debug("Triggering initial run")
+    schedule
+  end
+
+  def schedule
+    previous_state = @processing.swap(SCHEDULED)
+
+    case previous_state
+      when SCHEDULED
+        #ignore, already scheduled
+        logger.debug("Already scheduled")
+      when PROCESSING
+        #ignore, processing thread will reschedule
+        logger.debug("Scheduling queued")
+      when IDLE
+        schedule_internal
+    end
+  end
+
+  private
+  def on_change(modified, added, removed)
+    unless modified.empty? && added.empty?
+      logger.debug("Change detected")
+      schedule
     end
   end
 
@@ -59,32 +84,15 @@ class SlowListener
       @processor.run(old)
     end
 
-    @processing.compare_and_swap(PROCESSING,IDLE)
+    @processing.compare_and_swap(PROCESSING, IDLE)
 
     if @processing.get == SCHEDULED
       logger.debug("Rescheduling...")
-      schedule
+      schedule_internal
     end
   end
 
-  def on_change
-    logger.debug("Change detected")
-
-    previous_state = @processing.swap(SCHEDULED)
-
-    case previous_state
-      when SCHEDULED
-        #ignore, already scheduled
-        logger.debug("Already scheduled")
-      when PROCESSING
-        #ignore, processing thread will reschedule
-        logger.debug("Scheduling queued")
-      when IDLE
-        schedule
-    end
-  end
-
-  def schedule
+  def schedule_internal
     if @scheduler.jobs.empty?
       logger.debug("Scheduling processing for #@wait sec")
       @scheduler.in @wait do
