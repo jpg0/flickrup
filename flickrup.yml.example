@@ -2,3 +2,12 @@ watch_dir: "/Users/jpg/Dropbox/Camera Uploads"
 api_key: "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
 shared_secret: "XXXXXXXXXXXXXXXX"
 archive_dir: "/mnt/archive/PIX"
+tagsetprefix: "grouping:set="
+visibilityprefix: "sharing:visibility="
+tag_replacements:
+  LensType:
+    "NO-LENS": "Rokinon 7.5mm 1:3.5 UMC Fisheye CS"
+  FocalLength:
+    "0.0 mm": "7.5 mm"
+  FocalLengthIn35mmFormat:
+    "0 mm": "7.5 mm"

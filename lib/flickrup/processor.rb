@@ -61,10 +61,10 @@ class Processor
   end
 
   def get_preupload_handlers
-    [MachineTags.new(@config, {})]
+    [MachineTags.new(@config, {}), ReplacementTags.new(@config)]
   end
 
-  def upload_handlers() [TagSets, Visibility, ReplacementTags] end
+  def upload_handlers() [TagSets, Visibility] end
 
 end
 

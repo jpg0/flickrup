@@ -1,10 +1,9 @@
 class ReplacementTags
-  def initialize(config, delegate, context)
+  def initialize(config)
     @config = config
-    @delegate = delegate
   end
 
-  def upload(image, meta, config)
+  def preupload(image, meta, config)
 
     replacements = @config[:tag_replacements]
 
@@ -20,7 +19,5 @@ class ReplacementTags
         end
       end
     end
-
-    @delegate.upload(image, meta, config)
   end
 end
