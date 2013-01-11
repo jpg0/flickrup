@@ -13,7 +13,12 @@ class TaggedImage
   end
 
   def tags
-    @parsed.keywords.to_a
+    keywords = @parsed.keywords
+    if keywords.class == String
+      [keywords]
+    else
+      keywords
+    end
   end
 
   def doUpload(preupload_handlers, uploader)
