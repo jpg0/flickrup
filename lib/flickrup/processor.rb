@@ -30,6 +30,8 @@ class Processor
 
     tagged = images.select { |x| !(x.tags.nil? || x.tags.empty?) }
 
+    logger.debug("Selected #{tagged.length} files for upload")
+
     uploader = get_uploader
 
     if @config[:dryrun]
@@ -37,8 +39,12 @@ class Processor
       sleep 5
     else
       tagged.each { |x|
+        logger.debug("Beginning upload for #{tagged.file}...")
         x.doUpload(get_preupload_handlers, uploader)
+        logger.debug("Upload complete for #{tagged.file}")
+        logger.debug("Beginning archive for #{tagged.file}...")
         x.archive(@config[:archive_dir])
+        logger.debug("Processing complete for #{tagged.file}")
       }
     end
 
