@@ -30,10 +30,10 @@ class Visibility < PrefixedExtension
       {UploaderConstants::NO_UPLOAD => true}
     elsif visibility == "private"
       logger.debug("Private visibility specified.")
-      {"is_public" => "false"}
+      {"is_public" => "0", "is_friend" => "0", "is_family" => "0"}
     elsif visibility == "friends"
       logger.debug("Friends visibility specified.")
-      {"is_public" => "false", "is_friend" => "true", "is_family" => "true"}
+      {"is_public" => "0", "is_friend" => "1", "is_family" => "1"}
     else
       logger.warn("Unknown visibility #{visibility}. Ignoring.")
       {}
