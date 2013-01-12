@@ -38,14 +38,18 @@ class Processor
       logger.info("Would now upload & move #{tagged.length} files, pausing for 5 secs instead")
       sleep 5
     else
-      tagged.each { |x|
-        logger.debug("Beginning upload for #{x.filename}...")
-        x.doUpload(get_preupload_handlers, uploader)
-        logger.debug("Upload complete for #{x.filename}")
-        logger.debug("Beginning archive for #{x.filename}...")
-        x.archive(@config[:archive_dir])
-        logger.debug("Processing complete for #{x.filename}")
-      }
+      tagged.each do |x|
+        begin
+          logger.debug("Beginning upload for #{x.filename}...")
+          x.doUpload(get_preupload_handlers, uploader)
+          logger.debug("Upload complete for #{x.filename}")
+          logger.debug("Beginning archive for #{x.filename}...")
+          x.archive(@config[:archive_dir])
+          logger.debug("Processing complete for #{x.filename}")
+        rescue => e
+          logger.error("Failed to process #{x.filename} due to exception: #{e}")
+        end
+      end
     end
 
     logger.debug("Processed #{tagged.length} valid files")
@@ -70,7 +74,9 @@ class Processor
     [MachineTags.new(@config, {}), ReplacementTags.new(@config)]
   end
 
-  def upload_handlers() [TagSets, Visibility] end
+  def upload_handlers()
+    [TagSets, Visibility]
+  end
 
 end
 
