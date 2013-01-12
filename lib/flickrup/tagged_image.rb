@@ -49,7 +49,7 @@ class TaggedImage
 
     target_dir = File.join(
         to_dir,
-        date_taken.strftime("%y"),
+        date_taken.strftime("%Y"),
         date_taken.strftime("%b")
     )
 
