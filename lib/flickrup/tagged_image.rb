@@ -16,12 +16,13 @@ class TaggedImage
 
   def tags
     keywords = @parsed.keywords
-    if keywords.class == String
+    TagSet.new(if keywords == nil
+      []
+    elsif keywords.class == String
       [keywords]
     else
       keywords
-    end
-    TagSet.new(keywords)
+    end)
   end
 
   def doUpload(preupload_handlers, uploader)
