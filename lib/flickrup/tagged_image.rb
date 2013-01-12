@@ -50,7 +50,7 @@ class TaggedImage
     target_dir = File.join(
         to_dir,
         date_taken.strftime("%y"),
-        date_taken.strftime("%m")
+        date_taken.strftime("%b")
     )
 
     FileUtils.mkdir_p(target_dir)
