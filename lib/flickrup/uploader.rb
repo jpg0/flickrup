@@ -14,22 +14,26 @@ class Uploader
     @flickr = flickr_client
   end
 
-  def upload(image, meta, config)
+  def upload(ctx)
 
-    if config[UploaderConstants::NO_UPLOAD]
-      logger.info("Skipping upload of #{image} as marked as NO_UPLOAD")
+    if ctx.upload_properties[UploaderConstants::NO_UPLOAD]
+      logger.info("Skipping upload of #{ctx.image.filename} as marked as NO_UPLOAD")
     else
-      logger.debug("Uploading #{image} with tags #{config[:tags]}")
+      logger.debug("Uploading #{ctx.image.filename} with tags #{ctx.image.tags}")
 
       begin
-        rv = @flickr.upload_photo(image, config)
-        logger.debug("Uploaded #{image}")
+        rv = @flickr.upload_photo(ctx.image.filename, prepare_upload_properties(ctx))
+        logger.debug("Uploaded #{ctx.image.filename}")
       rescue StandardError => err
-        logger.error("Failed to upload #{image}: #{err}")
+        logger.error("Failed to upload #{ctx.image.filename}: #{err}")
       end
     end
 
     rv
+  end
+
+  def prepare_upload_properties(ctx)
+    {:tags => ctx.image.tags.to_s}.merge(ctx.upload_properties)
   end
 
 end

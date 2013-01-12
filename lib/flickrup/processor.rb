@@ -39,12 +39,12 @@ class Processor
       sleep 5
     else
       tagged.each { |x|
-        logger.debug("Beginning upload for #{x.file}...")
+        logger.debug("Beginning upload for #{x.filename}...")
         x.doUpload(get_preupload_handlers, uploader)
-        logger.debug("Upload complete for #{x.file}")
-        logger.debug("Beginning archive for #{x.file}...")
+        logger.debug("Upload complete for #{x.filename}")
+        logger.debug("Beginning archive for #{x.filename}...")
         x.archive(@config[:archive_dir])
-        logger.debug("Processing complete for #{x.file}")
+        logger.debug("Processing complete for #{x.filename}")
       }
     end
 

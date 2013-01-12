@@ -7,10 +7,10 @@ class TagSets < PrefixedExtension
     @flickr = context[:flickr_client]
   end
 
-  def upload(image, meta, config)
-    sets = values(:tagsetprefix, config)
+  def upload(ctx)
+    sets = values(:tagsetprefix, ctx)
 
-    uploaded = @delegate.upload(image, meta, config)
+    uploaded = @delegate.upload(ctx)
 
     sets.each do |set|
       @flickr.add_to_set(uploaded, set)

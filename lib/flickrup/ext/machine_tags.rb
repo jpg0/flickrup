@@ -3,9 +3,9 @@ class MachineTags
     @config = config
   end
 
-  def preupload(image, meta, config)
+  def preupload(ctx)
 
-    tags = config[:tags]
+    tags = ctx.image.tags
 
     remapped = tags.map do |x|
       x.sub(/^([^:]+):([^:]+)::/,"\\1:\\2=")
@@ -14,11 +14,11 @@ class MachineTags
 
 
     unless tags == remapped #write back to file
-      meta['Keywords'] = remapped
-      meta['Subject'] = remapped #also write Subject XMP tag
+      ctx.image['Keywords'] = remapped
+      ctx.image['Subject'] = remapped #also write Subject XMP tag
     end
 
-    config.merge({:tags => TagSet.new(remapped)})
+    ctx
 
   end
 end

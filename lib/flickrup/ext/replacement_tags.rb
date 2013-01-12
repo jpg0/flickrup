@@ -3,23 +3,23 @@ class ReplacementTags
     @config = config
   end
 
-  def preupload(image, meta, config)
+  def preupload(ctx)
 
     replacements = @config[:tag_replacements]
 
     if replacements != nil
       replacements.each do |tag_name, tag_value_replacements|
-        existing = meta[tag_name]
+        existing = ctx.image[tag_name]
 
         tag_value_replacements.each do |key, value|
           if existing == key
-            meta[tag_name] = value
+            ctx.image[tag_name] = value
             break
           end
         end
       end
     end
 
-    config
+    ctx
   end
 end

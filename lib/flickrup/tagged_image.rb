@@ -2,15 +2,16 @@ require 'mini_exiftool'
 require 'fileutils'
 require "flickrup/logging"
 require "flickrup/tag_set"
+require "flickrup/processing_context"
 
 class TaggedImage
   include Logging
 
-  attr_reader :file
+  attr_reader :filename
 
-  def initialize(file)
-    @file = file
-    @parsed = MiniExiftool.new @file
+  def initialize(filename)
+    @filename = filename
+    @parsed = MiniExiftool.new filename
   end
 
   def tags
@@ -25,8 +26,8 @@ class TaggedImage
 
   def doUpload(preupload_handlers, uploader)
 
-    config = preupload_handlers.reduce({:tags => tags}) do |config, handler|
-      handler.preupload(file, self, config)
+    context = preupload_handlers.reduce(ProcessingContext.new(self)) do |ctx, handler|
+      handler.preupload(ctx)
     end
 
     #maybe save afterwards
@@ -34,7 +35,7 @@ class TaggedImage
       @parsed.save!
     end
 
-    uploader.upload(file, self, config)
+    uploader.upload(context)
 
     #maybe save afterwards
     if @parsed.changed?
@@ -52,8 +53,8 @@ class TaggedImage
     )
 
     FileUtils.mkdir_p(target_dir)
-    FileUtils.mv(@file, File.join(target_dir, File.basename(@file)))
-    logger.info("Archived #{File.basename(@file)} to #{target_dir}")
+    FileUtils.mv(@filename, File.join(target_dir, File.basename(@filename)))
+    logger.info("Archived #{File.basename(@filename)} to #{target_dir}")
   end
 
   # Returns the value of a tag.

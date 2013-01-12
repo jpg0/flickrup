@@ -8,8 +8,8 @@ class Visibility < PrefixedExtension
     @delegate = delegate
   end
 
-  def upload(image, meta, config)
-    visibility = values(:visibilityprefix, config)
+  def upload(ctx)
+    visibility = values(:visibilityprefix, ctx)
 
     config_override = if visibility.length == 0
       logger.debug("No visibility specified for #{image}.")
@@ -21,7 +21,7 @@ class Visibility < PrefixedExtension
       config_for_visibility(visibility[0])
     end
 
-    @delegate.upload(image, meta, config.merge(config_override))
+    @delegate.upload(ctx.with_properties(config_override))
   end
 
   def config_for_visibility(visibility)

@@ -3,8 +3,8 @@ class PrefixedExtension
     @config = config
   end
 
-  def values(prefix_key, config)
-    all_tags = config[:tags]
+  def values(prefix_key, ctx)
+    all_tags = ctx.image.tags
 
     prefix = @config[prefix_key]
 
