@@ -8,7 +8,7 @@ class TagSets < PrefixedExtension
   end
 
   def upload(ctx)
-    sets = values(:tagsetprefix, ctx)
+    sets = values(:tagsetprefix, ctx).uniq
 
     uploaded = @delegate.upload(ctx)
 
