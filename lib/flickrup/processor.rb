@@ -28,7 +28,7 @@ class Processor
 
     images = files.map { |x| TaggedImage.new(x) }
 
-    tagged = images.select { |x| !(x.tags.nil? || x.tags.empty?) }
+    tagged = images.select { |x| !(x.tags.nil? || x.tags.empty?) }.sort { |x,y| x.filename <=> y.filename}
 
     logger.debug("Selected #{tagged.length} files for upload")
 
