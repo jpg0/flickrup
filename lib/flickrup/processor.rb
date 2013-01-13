@@ -26,9 +26,20 @@ class Processor
       return 0
     end
 
-    images = files.map { |x| TaggedImage.new(x) }
+    # some files may have been removed by now: https://bitbucket.org/jgilbert/flickrup/issue/1
+    images = files.map { |x|
+      if File.exist? x
+        TaggedImage.new(x)
+      else
+        nil
+      end
+    }.compact
 
-    tagged = images.select { |x| !(x.tags.nil? || x.tags.empty?) }.sort { |x,y| x.filename <=> y.filename}
+    tagged = images.select { |x|
+      !(x.tags.nil? || x.tags.empty?)
+    }.sort_by { |x|
+      [x.filename]
+    }
 
     logger.debug("Selected #{tagged.length} files for upload")
 

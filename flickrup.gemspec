@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'flickrup'
-  s.version     = '1.0.0'
+  s.version     = '1.0.1'
   s.date        = '2012-12-21'
   s.summary     = "Flickr Uploader!"
   s.description = "Flickr auto uploading script"
