@@ -24,12 +24,13 @@ module Flickrup
         opt :once, "Run single pass" # flag --once, default false
         opt :nowait, "Upload immediately on change, no delay"
         opt :loglevel, "Logging level", :type => :string, :default => "INFO"
+        opt :logfile, "Log file (-- for STDOUT)", :type => :string, :default => "--"
         opt :config, "Configuration file", :type => :string, :default => './flickrup.yml'
         opt :timeout, "Timeout/Wait for file modification", :default => 5*60
         opt :dryrun, "Dry run, don't move or upload (useful for debugging)"
       end
 
-      logger.level = Logger::Severity.const_get(opts.loglevel)
+      Logging.pre_init(Logger::Severity.const_get(opts.loglevel), opts.logfile == "--" ? STDOUT : opts.logfile)
 
       #load config, symbolise, merge with command line config
       config = YAML::load(File.open(opts.config, "r")).inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}.merge opts
