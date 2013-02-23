@@ -1,4 +1,4 @@
-require "flickrup/tagged_image"
+require "flickrup/filetype/tagged_file"
 require "flickrup/uploader"
 require "flickrup/logging"
 require "flickrup/ext/tag_sets"
@@ -17,9 +17,9 @@ class Processor
     Dir["#{@config[:watch_dir]}/paused"].length > 0
   end
 
-  def run(files = Dir["#{@config[:watch_dir]}/*.{jpg,JPG,jpeg,JPEG}"])
+  def run(all_files = Dir["#{@config[:watch_dir]}/*.*"])
 
-    logger.debug("Processing #{files.length} files")
+    logger.debug("Processing #{all_files.length} files")
 
     if paused
       logger.debug("Paused detected, so skipping processing...")
@@ -27,15 +27,15 @@ class Processor
     end
 
     # some files may have been removed by now: https://bitbucket.org/jgilbert/flickrup/issue/1
-    images = files.map { |x|
+    files = all_files.map { |x|
       if File.exist? x
-        TaggedImage.new(x)
+        TaggedFile.create(x)
       else
         nil
       end
     }.compact
 
-    tagged = images.select { |x|
+    tagged = files.select { |x|
       !(x.tags.nil? || x.tags.empty?)
     }.sort_by { |x|
       [x.filename]

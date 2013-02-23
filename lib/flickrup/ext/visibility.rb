@@ -12,7 +12,7 @@ class Visibility < PrefixedExtension
     visibility = values(:visibilityprefix, ctx)
 
     config_override = if visibility.length == 0
-      logger.debug("No visibility specified for #{ctx.image.filename}.")
+      logger.debug("No visibility specified for #{ctx.file.filename}.")
       {}
     elsif visibility.length == 1
       config_for_visibility(visibility[0])

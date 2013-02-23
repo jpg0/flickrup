@@ -16,7 +16,7 @@ class TagSets < PrefixedExtension
     uploaded = @delegate.upload(ctx)
 
     sets.each do |set|
-      logger.debug("Adding #{ctx.image.filename} to set: #{set}")
+      logger.debug("Adding #{ctx.file.filename} to set: #{set}")
       @flickr.add_to_set(uploaded, set)
     end
   end

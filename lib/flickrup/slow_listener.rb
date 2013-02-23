@@ -70,7 +70,7 @@ class SlowListener
 
     @processing.set PROCESSING
 
-    files = Dir["#{@config[:watch_dir]}/*.{jpg,JPG,jpeg,JPEG}"]
+    files = Dir["#{@config[:watch_dir]}/*.*"]
 
     old, new = files.partition { |x| Time.now > File.mtime(x) + @wait }
 

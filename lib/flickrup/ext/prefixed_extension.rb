@@ -8,7 +8,7 @@ class PrefixedExtension
     prefix = @config[prefix_key]
 
     if prefix
-      all_tags = ctx.image.tags
+      all_tags = ctx.file.tags
 
       (selected_tags, tags) = all_tags.partition do |x|
         x.start_with?("#{prefix}")

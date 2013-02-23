@@ -16,5 +16,6 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'flickraw', '>= 0.9.6'
   s.add_runtime_dependency 'json', '>= 1.7.0' #Flickraw seems to need this, but doesn't bring it in?
   s.add_runtime_dependency 'trollop', '>= 2.0.0'
+  s.add_runtime_dependency 'inifile', '>= 2.0.0'
 
 end

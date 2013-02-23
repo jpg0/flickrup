@@ -9,11 +9,11 @@ class ReplacementTags
 
     if replacements != nil
       replacements.each do |tag_name, tag_value_replacements|
-        existing = ctx.image[tag_name]
+        existing = ctx.file[tag_name]
 
         tag_value_replacements.each do |key, value|
           if existing == key
-            ctx.image[tag_name] = value
+            ctx.file[tag_name] = value
             break
           end
         end

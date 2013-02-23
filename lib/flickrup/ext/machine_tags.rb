@@ -5,7 +5,7 @@ class MachineTags
 
   def preupload(ctx)
 
-    tags = ctx.image.tags
+    tags = ctx.file.tags
 
     remapped = tags.map do |x|
       x.sub(/^([^:]+):([^:]+)::/,"\\1:\\2=")
@@ -14,8 +14,8 @@ class MachineTags
 
 
     unless tags == remapped #write back to file
-      ctx.image['Keywords'] = remapped
-      ctx.image['Subject'] = remapped #also write Subject XMP tag
+      ctx.file['Keywords'] = remapped
+      ctx.file['Subject'] = remapped #also write Subject XMP tag
     end
 
     ctx
