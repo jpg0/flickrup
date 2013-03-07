@@ -1,4 +1,5 @@
 require "flickraw"
+require 'etc'
 
 class FlickrClient
 
@@ -7,7 +8,8 @@ class FlickrClient
     FlickRaw.api_key= api_key
     FlickRaw.shared_secret=shared_secret
 
-    @token_file = File.join(ENV['HOME'], ".flickrup")
+    home = ENV['HOME'] || Etc.getpwuid.dir
+    @token_file = File.join(home, ".flickrup")
     set_client(FlickRaw::Flickr.new)
 
     if File.exist?(@token_file)
