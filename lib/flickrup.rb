@@ -2,6 +2,7 @@ require "yaml"
 require "rubygems"
 require "trollop"
 require "logger"
+require "etc"
 require "flickrup/quick_listener"
 require "flickrup/slow_listener"
 require "flickrup/filetype/tagged_file"
@@ -31,6 +32,9 @@ module Flickrup
       end
 
       Logging.pre_init(Logger::Severity.const_get(opts.loglevel), opts.logfile == "--" ? STDOUT : opts.logfile)
+
+      #set home if unset
+      ENV['HOME'] ||= Etc.getpwuid.dir
 
       #load config, symbolise, merge with command line config
       config = YAML::load(File.open(opts.config, "r")).inject({}){|memo,(k,v)| memo[k.to_sym] = v; memo}.merge opts
