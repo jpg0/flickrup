@@ -59,6 +59,7 @@ class Processor
           logger.debug("Processing complete for #{x.filename}")
         rescue => e
           logger.error("Failed to process #{x.filename} due to exception: #{e}")
+          logger.debug(e.backtrace.join("\n"))
         end
       end
     end
