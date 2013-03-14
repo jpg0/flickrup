@@ -33,6 +33,6 @@ class TaggedVideo < TaggedFile
     @properties[tag] = val
   end
 
-  register_reader(%w(mp4 mts))
+  register_reader(%w(mp4 MP4 mts MTS))
 
 end
