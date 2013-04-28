@@ -5,6 +5,7 @@ require "flickrup/ext/tag_sets"
 require "flickrup/ext/replacement_tags"
 require "flickrup/ext/machine_tags"
 require "flickrup/ext/visibility"
+require "flickrup/archiver"
 
 class Processor
   include Logging
@@ -55,7 +56,7 @@ class Processor
           x.doUpload(get_preupload_handlers, uploader)
           logger.debug("Upload complete for #{x.filename}")
           logger.debug("Beginning archive for #{x.filename}...")
-          x.archive(@config[:archive_dir])
+          x.archive(get_archiver, @config[:archive_dir])
           logger.debug("Processing complete for #{x.filename}")
         rescue => e
           logger.error("Failed to process #{x.filename} due to exception: #{e}")
@@ -82,12 +83,22 @@ class Processor
     end
   end
 
+  def get_archiver
+    archive_handlers.reduce(Archiver.new) do |result, clazz|
+      clazz.new(@config, result, {})
+    end
+  end
+
   def get_preupload_handlers
     [MachineTags.new(@config, {}), ReplacementTags.new(@config)]
   end
 
-  def upload_handlers()
+  def upload_handlers
     [TagSets, Visibility]
+  end
+
+  def archive_handlers
+    [TagSets]
   end
 
 end

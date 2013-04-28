@@ -15,9 +15,20 @@ class TagSets < PrefixedExtension
 
     uploaded = @delegate.upload(ctx)
 
-    sets.each do |set|
-      logger.debug("Adding #{ctx.file.filename} to set: #{set}")
-      @flickr.add_to_set(uploaded, set)
+    unless ctx.properties[UploaderConstants::NO_UPLOAD] == true
+      sets.each do |set|
+        logger.debug("Adding #{ctx.file.filename} to set: #{set}")
+        @flickr.add_to_set(uploaded, set)
+      end
     end
+  end
+
+  def archive(ctx)
+    sets = values(:tagsetprefix, ctx).uniq
+
+    if sets.length == 1
+      ctx.properties[:subdir] = sets[0]
+    end
+    @delegate.archive(ctx)
   end
 end

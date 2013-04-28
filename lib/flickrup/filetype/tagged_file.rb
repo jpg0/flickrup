@@ -44,9 +44,12 @@ class TaggedFile
                end)
   end
 
-  def archive(to_dir)
-    date_taken = @parsed.date_time_original || @parsed.modifydate
-    archive_by_date(to_dir, date_taken)
+  def archive(archive_handlers, to_dir)
+    archive_handlers.archive(ProcessingContext.new(self, {
+        :archive_dir => to_dir,
+        :date_taken => @parsed.date_time_original || @parsed.modifydate,
+        :filename => @filename
+    }))
   end
 
   def pre_upload
@@ -56,25 +59,6 @@ class TaggedFile
   def post_upload
 
   end
-
-  private
-
-  def archive_by_date(to_dir, date)
-    archive_file_by_date(@filename, to_dir, date)
-  end
-
-  def archive_file_by_date(file, to_dir, date)
-    target_dir = File.join(
-        to_dir,
-        date.strftime("%Y"),
-        date.strftime("%b")
-    )
-
-    FileUtils.mkdir_p(target_dir)
-    FileUtils.mv(file, File.join(target_dir, File.basename(file)))
-    logger.info("Archived #{File.basename(file)} to #{target_dir}")
-  end
-
 end
 
 require 'flickrup/filetype/tagged_image'

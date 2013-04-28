@@ -16,7 +16,7 @@ class Uploader
 
   def upload(ctx)
 
-    if ctx.upload_properties[UploaderConstants::NO_UPLOAD]
+    if ctx.properties[UploaderConstants::NO_UPLOAD]
       logger.info("Skipping upload of #{ctx.file.filename} as marked as NO_UPLOAD")
     else
       logger.debug("Uploading #{ctx.file.filename} with tags #{ctx.file.tags}")
@@ -33,7 +33,7 @@ class Uploader
   end
 
   def prepare_upload_properties(ctx)
-    {:tags => ctx.file.tags.to_s}.merge(ctx.upload_properties)
+    {:tags => ctx.file.tags.to_s}.merge(ctx.properties)
   end
 
 end

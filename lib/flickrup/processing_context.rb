@@ -1,13 +1,13 @@
 class ProcessingContext
   attr_reader :file
-  attr_reader :upload_properties
+  attr_reader :properties
 
   def initialize(file, props = {})
     @file = file
-    @upload_properties = props
+    @properties = props
   end
 
   def with_properties(props)
-    ProcessingContext.new(self.file, self.upload_properties.merge(props))
+    ProcessingContext.new(self.file, self.properties.merge(props))
   end
 end
