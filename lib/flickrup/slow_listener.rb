@@ -36,7 +36,7 @@ class SlowListener
     logger.debug("Watching #{@config[:watch_dir]}...")
     @listener = Listen.to(@config[:watch_dir])
     @listener.change(&method(:on_change))
-    @listener.start(false)
+    @listener.start
 
     logger.debug("Triggering initial run")
     schedule
