@@ -6,6 +6,7 @@ require "flickrup/ext/replacement_tags"
 require "flickrup/ext/machine_tags"
 require "flickrup/ext/visibility"
 require "flickrup/archiver"
+require "flickrup/ext/associated_files"
 
 class Processor
   include Logging
@@ -98,7 +99,7 @@ class Processor
   end
 
   def archive_handlers
-    [TagSets]
+    [TagSets, AssociatedFiles]
   end
 
 end

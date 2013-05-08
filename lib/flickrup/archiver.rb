@@ -1,6 +1,7 @@
 require "fileutils"
 
 class Archiver
+  include Logging
 
   def archive(ctx)
     archive_file_by_date(ctx.properties[:filename], ctx.properties[:archive_dir], ctx.properties[:date_taken], ctx.properties[:subdir])

@@ -11,3 +11,5 @@ tag_replacements:
     "0.0 mm": "7.5 mm"
   FocalLengthIn35mmFormat:
     "0 mm": "7.5 mm"
+associated_files:
+    - /JPG$/NEF/i
