@@ -33,18 +33,16 @@ class FlickrClient
   end
 
   def add_to_set(photo_id, set_name)
-    set_id = get_set_id(set_name, photo_id)
-    client.photosets.addPhoto(:photoset_id => set_id, :photo_id => photo_id)
-  end
-
-  def get_set_id(set_name, for_photo_id)
     unless @set_name_to_id.include? set_name
       sets_response = client.photosets.getList #if we don't have it, refresh
       @set_name_to_id = Hash[*sets_response.to_a.map{ |set|
         [set['title'], set['id']]
       }.flatten]
-      unless @set_name_to_id.include? set_name #if we still don't, create it
-        created = client.photosets.create(:title => set_name, :primary_photo_id => for_photo_id)
+
+      if @set_name_to_id.include? set_name
+        client.photosets.addPhoto(:photoset_id => @set_name_to_id[set_name], :photo_id => photo_id)
+      else #if we still don't, create it
+        created = client.photosets.create(:title => set_name, :primary_photo_id => photo_id)
         @set_name_to_id = @set_name_to_id.merge({set_name => created.id})
       end
     end
