@@ -73,21 +73,29 @@ class Processor
 
   private
   def get_uploader
-    flickr_client = FlickrClient.new(@config[:api_key], @config[:shared_secret])
 
-    context = {:flickr_client => flickr_client}
+    unless @uploader
+      flickr_client = FlickrClient.new(@config[:api_key], @config[:shared_secret])
 
-    uploader = Uploader.new(flickr_client)
+      context = {:flickr_client => flickr_client}
 
-    upload_handlers.reduce(uploader) do |result, clazz|
-      clazz.new(@config, result, context)
+      uploader = Uploader.new(flickr_client)
+
+      @uploader = upload_handlers.reduce(uploader) do |result, clazz|
+        clazz.new(@config, result, context)
+      end
     end
+
+    return @uploader
   end
 
   def get_archiver
-    archive_handlers.reduce(Archiver.new) do |result, clazz|
-      clazz.new(@config, result, {})
+    unless @archiver
+      @archiver = archive_handlers.reduce(Archiver.new) do |result, clazz|
+        clazz.new(@config, result, {})
+      end
     end
+    return @archiver
   end
 
   def get_preupload_handlers
