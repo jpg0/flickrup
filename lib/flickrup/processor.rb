@@ -75,11 +75,10 @@ class Processor
   def get_uploader
 
     unless @uploader
-      flickr_client = FlickrClient.new(@config[:api_key], @config[:shared_secret])
 
-      context = {:flickr_client => flickr_client}
+      context = get_chain_context()
 
-      uploader = Uploader.new(flickr_client)
+      uploader = Uploader.new(context[:flickr_client])
 
       @uploader = upload_handlers.reduce(uploader) do |result, clazz|
         clazz.new(@config, result, context)
@@ -92,10 +91,19 @@ class Processor
   def get_archiver
     unless @archiver
       @archiver = archive_handlers.reduce(Archiver.new) do |result, clazz|
-        clazz.new(@config, result, {})
+        clazz.new(@config, result, get_chain_context)
       end
     end
     return @archiver
+  end
+
+  def get_chain_context
+    unless @chain_context
+      flickr_client = FlickrClient.new(@config[:api_key], @config[:shared_secret])
+      @chain_context = {:flickr_client => flickr_client}
+    end
+
+    return @chain_context
   end
 
   def get_preupload_handlers

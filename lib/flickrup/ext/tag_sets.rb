@@ -28,6 +28,8 @@ class TagSets < PrefixedExtension
 
     if sets.length == 1
       ctx.properties[:subdir] = sets[0]
+      set_date = @flickr.date_of_set(sets[0])
+      ctx.properties[:date_taken] = set_date
     end
     @delegate.archive(ctx)
   end

@@ -5,6 +5,7 @@ class FlickrClient
 
   def initialize(api_key, shared_secret)
     @set_name_to_id = {}
+    @set_id_to_date = {}
     FlickRaw.api_key= api_key
     FlickRaw.shared_secret=shared_secret
 
@@ -32,22 +33,26 @@ class FlickrClient
     client.upload_photo(image, config)
   end
 
-  def add_to_set(photo_id, set_name)
-    unless @set_name_to_id.include? set_name
-      sets_response = client.photosets.getList #if we don't have it, refresh
-      @set_name_to_id = Hash[*sets_response.to_a.map{ |set|
-        [set['title'], set['id']]
-      }.flatten]
+  def date_of_set(set_name)
+    id = id_from_cache(set_name)
 
-      if @set_name_to_id.include? set_name
-        client.photosets.addPhoto(:photoset_id => @set_name_to_id[set_name], :photo_id => photo_id)
-      else #if we still don't, create it
-        created = client.photosets.create(:title => set_name, :primary_photo_id => photo_id)
-        @set_name_to_id = @set_name_to_id.merge({set_name => created.id})
-      end
+    unless @set_id_to_date.include? id
+      info = client.photosets.getInfo(:photoset_id => id)
+      @set_id_to_date[id] = DateTime.strptime(info.date_create, '%s').new_offset(DateTime.now.offset)
     end
 
-    @set_name_to_id[set_name]
+    return @set_id_to_date[id]
+  end
+
+  def add_to_set(photo_id, set_name)
+    id = id_from_cache(set_name)
+
+    if id
+      client.photosets.addPhoto(:photoset_id => @set_name_to_id[set_name], :photo_id => photo_id)
+    else #if we still don't, create it
+      created = client.photosets.create(:title => set_name, :primary_photo_id => photo_id)
+      @set_name_to_id = @set_name_to_id.merge({set_name => created.id})
+    end
   end
 
   def get_token
@@ -71,6 +76,19 @@ class FlickrClient
   end
 
   private
+
+  def id_from_cache(set_name)
+    unless @set_name_to_id.include? set_name
+      sets_response = client.photosets.getList #if we don't have it, refresh
+      @set_name_to_id = Hash[*sets_response.to_a.map { |set|
+        [set['title'], set['id']]
+      }.flatten]
+
+    end
+
+    @set_name_to_id[set_name]
+  end
+
   def set_client(client)
     @client = client
   end
