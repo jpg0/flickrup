@@ -18,7 +18,7 @@ class TagSets < PrefixedExtension
     unless ctx.properties[UploaderConstants::NO_UPLOAD] == true
       sets.each do |set|
         logger.debug("Adding #{ctx.file.filename} to set: #{set}")
-        @flickr.add_to_set(uploaded, set)
+        @flickr.add_to_set(uploaded, set, ctx.file.date_created)
       end
     end
   end

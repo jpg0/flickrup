@@ -6,6 +6,8 @@ require "flickrup/processing_context"
 class TaggedImage < TaggedFile
   include Logging
 
+  TYPE = 'image'
+
   attr_reader :filename
 
   def initialize(filename)
@@ -37,6 +39,10 @@ class TaggedImage < TaggedFile
   # Set the value of a tag.
   def []=(tag, val)
     @parsed[tag] = val
+  end
+
+  def type
+    TYPE
   end
 
   register_reader(%w(jpg JPG jpeg JPEG))

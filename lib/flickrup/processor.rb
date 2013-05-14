@@ -5,6 +5,7 @@ require "flickrup/ext/tag_sets"
 require "flickrup/ext/replacement_tags"
 require "flickrup/ext/machine_tags"
 require "flickrup/ext/visibility"
+require "flickrup/ext/sidecar"
 require "flickrup/archiver"
 require "flickrup/ext/associated_files"
 
@@ -115,7 +116,7 @@ class Processor
   end
 
   def archive_handlers
-    [TagSets, AssociatedFiles]
+    [TagSets, Sidecar, AssociatedFiles]
   end
 
 end

@@ -59,6 +59,11 @@ class TaggedFile
   def post_upload
 
   end
+
+  def date_created
+    @parsed.date_time_original
+  end
+
 end
 
 require 'flickrup/filetype/tagged_image'

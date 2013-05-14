@@ -6,21 +6,12 @@ class TaggedVideo < TaggedFile
 
   attr_reader :filename
 
+  TYPE = 'video'
+
   def initialize(filename)
     super
     @filename = filename
     @properties = PicasaIni.open(filename)
-  end
-
-  def archive(to_dir)
-    super
-    write_sidecar(File.join(target_dir, "#{File.basename(file)}.meta"))
-  end
-
-  def write_sidecar(to_file)
-    File.open(to_file, "w") do |f|
-      f.write({:keywords => keywords}.to_yaml)
-    end
   end
 
   # Returns the value of a tag.
@@ -31,6 +22,10 @@ class TaggedVideo < TaggedFile
   # Set the value of a tag.
   def []=(tag, val)
     @properties[tag] = val
+  end
+
+  def type
+    TYPE
   end
 
   register_reader(%w(mp4 MP4 mts MTS))

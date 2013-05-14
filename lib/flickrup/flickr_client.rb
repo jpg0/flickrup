@@ -38,13 +38,14 @@ class FlickrClient
 
     unless @set_id_to_date.include? id
       info = client.photosets.getInfo(:photoset_id => id)
-      @set_id_to_date[id] = DateTime.strptime(info.date_create, '%s').new_offset(DateTime.now.offset)
+      primary = client.photos.getInfo(:photo_id => info.primary)
+      @set_id_to_date[id] = DateTime.strptime(primary.dates.taken, '%Y-%m-%d %H:%M:%S')
     end
 
     return @set_id_to_date[id]
   end
 
-  def add_to_set(photo_id, set_name)
+  def add_to_set(photo_id, set_name, photo_date_taken = nil)
     id = id_from_cache(set_name)
 
     if id
@@ -52,6 +53,9 @@ class FlickrClient
     else #if we still don't, create it
       created = client.photosets.create(:title => set_name, :primary_photo_id => photo_id)
       @set_name_to_id = @set_name_to_id.merge({set_name => created.id})
+      if photo_date_taken
+        @set_id_to_date[created.id] = photo_date_taken
+      end
     end
   end
 
