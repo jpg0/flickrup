@@ -2,8 +2,12 @@ class AssociatedFiles
 
   def initialize(config, delegate, context)
     @delegate = delegate
-    @replacements = config[:associated_files].map do |x|
-      extract_pair(x)
+    if config.has_key?(:associated_files)
+      @replacements = config[:associated_files].map do |x|
+        extract_pair(x)
+      end
+    else
+      @replacements = []
     end
   end
 
