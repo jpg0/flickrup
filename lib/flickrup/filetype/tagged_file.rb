@@ -39,8 +39,12 @@ class TaggedFile
                  []
                elsif keywords.class == String
                  [keywords]
+               elsif keywords.class == Integer
+                 keywords.to_s
                else
-                 keywords
+                 keywords.map do |keyword|
+                   keyword.to_s
+                 end
                end)
   end
 
