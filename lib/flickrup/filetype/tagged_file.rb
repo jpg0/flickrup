@@ -51,7 +51,7 @@ class TaggedFile
   def archive(archive_handlers, to_dir)
     archive_handlers.archive(ProcessingContext.new(self, {
         :archive_dir => to_dir,
-        :date_taken => @parsed.date_time_original || @parsed.modifydate,
+        :date_taken => @parsed.date_time_original || @parsed.modifydate || @parsed.filemodifydate,
         :filename => @filename
     }))
   end
