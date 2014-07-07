@@ -25,7 +25,7 @@ class SlowListener
 
   def initialize(config)
     @wait = config[:timeout]
-    logger.debug("Timeout set to #@wait secs")
+    logger.info("Timeout set to #@wait secs")
     @config = config
     @scheduler = Rufus::Scheduler.start_new
     @processor = Processor.new(config)
@@ -38,7 +38,7 @@ class SlowListener
     @listener.change(&method(:on_change))
     @listener.start
 
-    logger.debug("Triggering initial run")
+    logger.info("Triggering initial run")
     schedule
   end
 
@@ -48,10 +48,10 @@ class SlowListener
     case previous_state
       when SCHEDULED
         #ignore, already scheduled
-        logger.debug("Already scheduled")
+        logger.info("Already scheduled")
       when PROCESSING
         #ignore, processing thread will reschedule
-        logger.debug("Scheduling queued")
+        logger.info("Scheduling queued")
       when IDLE
         schedule_internal
     end
@@ -60,13 +60,13 @@ class SlowListener
   private
   def on_change(modified, added, removed)
     unless modified.empty? && added.empty?
-      logger.debug("Change detected")
+      logger.info("Change detected")
       schedule
     end
   end
 
   def do_upload
-    logger.debug("Checking files for upload")
+    logger.info("Checking files for upload")
 
     @processing.set PROCESSING
 
@@ -75,31 +75,31 @@ class SlowListener
     old, new = files.partition { |x| Time.now > File.mtime(x) + @wait }
 
     unless new.empty?
-      logger.debug("Found #{new.length} new files")
+      logger.info("Found #{new.length} new files")
       @processing.set SCHEDULED
     end
 
     unless old.empty?
-      logger.debug("Found #{old.length} stable files")
+      logger.info("Found #{old.length} stable files")
       @processor.run(old)
     end
 
     @processing.compare_and_swap(PROCESSING, IDLE)
 
     if @processing.get == SCHEDULED
-      logger.debug("Rescheduling...")
+      logger.info("Rescheduling...")
       schedule_internal
     end
   end
 
   def schedule_internal
     if @scheduler.jobs.empty?
-      logger.debug("Scheduling processing for #@wait sec")
+      logger.info("Scheduling processing for #@wait sec")
       @scheduler.in @wait do
         do_upload
       end
     else
-      logger.debug("Already scheduled")
+      logger.info("Already scheduled")
     end
   end
 

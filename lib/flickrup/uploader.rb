@@ -19,11 +19,11 @@ class Uploader
     if ctx.properties[UploaderConstants::NO_UPLOAD]
       logger.info("Skipping upload of #{ctx.file.filename} as marked as NO_UPLOAD")
     else
-      logger.debug("Uploading #{ctx.file.filename} with tags #{ctx.file.tags}")
+      logger.info("Uploading #{ctx.file.filename} with tags #{ctx.file.tags}")
 
       begin
         rv = @flickr.upload_photo(ctx.file.filename, prepare_upload_properties(ctx))
-        logger.debug("Uploaded #{ctx.file.filename}")
+        logger.info("Uploaded #{ctx.file.filename}")
       rescue StandardError => err
         logger.error("Failed to upload #{ctx.file.filename}: #{err}")
       end

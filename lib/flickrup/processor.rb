@@ -13,6 +13,7 @@ class Processor
   include Logging
 
   def initialize(config)
+    @MAX_DATE = Time.at(2130578470)
     @config = config
   end
 
@@ -22,10 +23,10 @@ class Processor
 
   def run(all_files = Dir["#{@config[:watch_dir]}/*.*"])
 
-    logger.debug("Processing #{all_files.length} files")
+    logger.info("Processing #{all_files.length} files")
 
     if paused
-      logger.debug("Paused detected, so skipping processing...")
+      logger.info("Paused detected, so skipping processing...")
       return 0
     end
 
@@ -34,17 +35,17 @@ class Processor
       if File.exist? x
         TaggedFile.create(x)
       else
-        nil
+        logger.debug("File #{x} already removed, skipping.")
       end
     }.compact
 
-    tagged = files.select { |x|
+    tagged = files.sort_by { |x|
+      x.date_created || @MAX_DATE
+    }.take_while { |x|
       !(x.tags.nil? || x.tags.empty?)
-    }.sort_by { |x|
-      [x.filename]
     }
 
-    logger.debug("Selected #{tagged.length} files for upload")
+    logger.info("Selected #{tagged.length} files for upload")
 
     uploader = get_uploader
 
@@ -54,20 +55,20 @@ class Processor
     else
       tagged.each do |x|
         begin
-          logger.debug("Beginning upload for #{x.filename}...")
+          logger.info("Beginning upload for #{x.filename}...")
           x.doUpload(get_preupload_handlers, uploader)
-          logger.debug("Upload complete for #{x.filename}")
-          logger.debug("Beginning archive for #{x.filename}...")
+          logger.info("Upload complete for #{x.filename}")
+          logger.info("Beginning archive for #{x.filename}...")
           x.archive(get_archiver, @config[:archive_dir])
-          logger.debug("Processing complete for #{x.filename}")
+          logger.info("Processing complete for #{x.filename}")
         rescue => e
           logger.error("Failed to process #{x.filename} due to exception: #{e}")
-          logger.debug(e.backtrace.join("\n"))
+          logger.info(e.backtrace.join("\n"))
         end
       end
     end
 
-    logger.debug("Processed #{tagged.length} valid files")
+    logger.info("Processed #{tagged.length} valid files")
 
     tagged.length
   end
