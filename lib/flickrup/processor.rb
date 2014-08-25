@@ -39,7 +39,7 @@ class Processor
       end
     }.compact
 
-    logger.debug("Scanned #{file.length} files")
+    logger.debug("Scanned #{files.length} files")
 
     by_date = files.sort_by { |x|
       x.date_created || @MAX_DATE
