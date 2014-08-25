@@ -39,13 +39,24 @@ class Processor
       end
     }.compact
 
-    tagged = files.sort_by { |x|
+    logger.debug("Scanned #{file.length} files")
+
+    by_date = files.sort_by { |x|
       x.date_created || @MAX_DATE
-    }.take_while { |x|
+    }
+
+    tagged = by_date.take_while { |x|
       !(x.tags.nil? || x.tags.empty?)
     }
 
-    logger.info("Selected #{tagged.length} files for upload")
+    if tagged.empty?
+      logger.info('No files selected for upload')
+      unless by_date.empty?
+        logger.debug("Stopped on #{by_date[0].filename}")
+      end
+    else
+      logger.info("Selected #{tagged.length} files for upload")
+    end
 
     uploader = get_uploader
 
