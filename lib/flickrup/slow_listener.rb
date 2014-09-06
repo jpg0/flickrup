@@ -53,7 +53,7 @@ class SlowListener
         #ignore, processing thread will reschedule
         logger.info("Scheduling queued")
       when IDLE
-        schedule_internal
+        schedule_internal @wait
     end
   end
 
@@ -71,6 +71,7 @@ class SlowListener
     @processing.set PROCESSING
 
     files = Dir["#{@config[:watch_dir]}/*.*"]
+    reprocess = false
 
     old, new = files.partition { |x| Time.now > File.mtime(x) + @wait }
 
@@ -81,25 +82,27 @@ class SlowListener
 
     unless old.empty?
       logger.info("Found #{old.length} stable files")
-      @processor.run(old)
+      reprocess = @processor.run(old)
     end
 
     @processing.compare_and_swap(PROCESSING, IDLE)
 
-    if @processing.get == SCHEDULED
+    if reprocess
+      schedule_internal 1
+    elsif @processing.get == SCHEDULED
       logger.info("Rescheduling...")
-      schedule_internal
+      schedule_internal @wait
     end
   end
 
-  def schedule_internal
+  def schedule_internal(secs)
     if @scheduler.jobs.empty?
-      logger.info("Scheduling processing for #@wait sec")
-      @scheduler.in @wait do
+      logger.info("Scheduling processing for #{secs} sec")
+      @scheduler.in secs do
         do_upload
       end
     else
-      logger.info("Already scheduled")
+      logger.info('Already scheduled')
     end
   end
 

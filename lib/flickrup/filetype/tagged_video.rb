@@ -28,6 +28,6 @@ class TaggedVideo < TaggedFile
     TYPE
   end
 
-  register_reader(%w(mp4 MP4 mts MTS))
+  register_reader(%w(mp4 MP4))
 
 end

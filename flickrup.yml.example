@@ -13,3 +13,6 @@ tag_replacements:
     "0 mm": "7.5 mm"
 associated_files:
     - /JPG$/NEF/i
+convert_files:
+    m2ts: "avconv -i '%{file}' -vcodec libx264 -acodec aac -strict experimental '%{file}.mp4'"
+    mts: "avconv -i '%{file}' -vcodec libx264 -acodec aac -strict experimental '%{file}.mp4'"

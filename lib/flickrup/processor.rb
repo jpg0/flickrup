@@ -8,6 +8,7 @@ require "flickrup/ext/visibility"
 require "flickrup/ext/sidecar"
 require "flickrup/archiver"
 require "flickrup/ext/associated_files"
+require 'flickrup/converter'
 
 class Processor
   include Logging
@@ -15,6 +16,7 @@ class Processor
   def initialize(config)
     @MAX_DATE = Time.at(2130578470)
     @config = config
+    @converter = Converter.new(config[:convert_files])
   end
 
   def paused
@@ -28,6 +30,19 @@ class Processor
     if paused
       logger.info("Paused detected, so skipping processing...")
       return 0
+    end
+
+    converted_count = all_files.select{ |x|
+      if File.exist? x
+        @converter.maybe_convert(x)
+      else
+        false
+      end
+    }.length
+
+    if converted_count > 0
+      logger.info("Converted #{converted_count} files, reprocessing")
+      return true
     end
 
     # some files may have been removed by now: https://bitbucket.org/jgilbert/flickrup/issue/1
@@ -81,7 +96,7 @@ class Processor
 
     logger.info("Processed #{tagged.length} valid files")
 
-    tagged.length
+    false
   end
 
   private
