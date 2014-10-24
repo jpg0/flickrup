@@ -31,6 +31,9 @@ class Visibility < PrefixedExtension
     elsif visibility == "private"
       logger.debug("Private visibility specified.")
       {"is_public" => "0", "is_friend" => "0", "is_family" => "0"}
+    elsif visibility == "family"
+      logger.debug("Family visibility specified.")
+      {"is_public" => "0", "is_friend" => "0", "is_family" => "1"}
     elsif visibility == "friends"
       logger.debug("Friends visibility specified.")
       {"is_public" => "0", "is_friend" => "1", "is_family" => "1"}
