@@ -6,6 +6,7 @@ require "flickrup/ext/replacement_tags"
 require "flickrup/ext/machine_tags"
 require "flickrup/ext/visibility"
 require "flickrup/ext/sidecar"
+require "flickrup/ext/blocked_tags"
 require "flickrup/archiver"
 require "flickrup/ext/associated_files"
 require 'flickrup/converter'
@@ -82,7 +83,9 @@ class Processor
       tagged.each do |x|
         begin
           logger.info("Beginning upload for #{x.filename}...")
-          x.doUpload(get_preupload_handlers, uploader)
+          unless x.doUpload(get_preupload_handlers, uploader)
+            break #abort
+          end
           logger.info("Upload complete for #{x.filename}")
           logger.info("Beginning archive for #{x.filename}...")
           x.archive(get_archiver, @config[:archive_dir])
@@ -135,7 +138,7 @@ class Processor
   end
 
   def get_preupload_handlers
-    [MachineTags.new(@config, {}), ReplacementTags.new(@config)]
+    [MachineTags.new(@config, {}), ReplacementTags.new(@config), BlockedTags.new(@config)]
   end
 
   def upload_handlers

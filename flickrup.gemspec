@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'flickrup'
-  s.version     = '1.1.19'
+  s.version     = '1.2.2'
   s.date        = '2014-07-07'
   s.summary     = "Flickr Uploader!"
   s.description = "Flickr auto uploading script"
@@ -13,9 +13,8 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'listen', '~> 0.6.0'
   s.add_runtime_dependency 'rufus-scheduler', '~> 2.0.0'
   s.add_runtime_dependency 'mini_exiftool', '~> 1.6.0'
-  s.add_runtime_dependency 'flickraw', '~> 0.9.6'
+  s.add_runtime_dependency 'flickraw', '~> 0.9.8'
   s.add_runtime_dependency 'json', '~> 1.7.0' #Flickraw seems to need this, but doesn't bring it in?
   s.add_runtime_dependency 'trollop', '~> 2.0.0'
   s.add_runtime_dependency 'inifile', '~> 2.0.0'
-
 end

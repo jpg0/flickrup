@@ -25,13 +25,22 @@ class TaggedFile
   def doUpload(preupload_handlers, uploader)
 
     context = preupload_handlers.reduce(ProcessingContext.new(self)) do |ctx, handler|
-      handler.preupload(ctx)
+      if ctx != nil
+        handler.preupload(ctx)
+      else
+        nil
+      end
     end
 
-    pre_upload
-    uploader.upload(context)
-    post_upload
-  end
+    if context == nil
+      false
+    else
+      pre_upload
+      uploader.upload(context)
+      post_upload
+      true
+    end
+end
 
   def tags
     keywords = self['keywords']
