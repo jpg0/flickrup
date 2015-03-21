@@ -7,15 +7,12 @@ visibilityprefix: "sharing:visibility="
 tag_replacements:
   LensType:
     "$camera:lens=fisheye": "Rokinon 7.5mm 1:3.5 UMC Fisheye CS"
-  FocalLength:
-    "$camera:lens=fisheye": "7.5 mm"
-  FocalLengthIn35mmFormat:
-    "$camera:lens=fisheye": "7.5 mm"
-  LensType:
     "$camera:lens=om": "Olympus OM-SYSTEM ZUIKO MC Auto-S 1:1,8 50mm"
   FocalLength:
+    "$camera:lens=fisheye": "7.5 mm"
     "$camera:lens=om": "50 mm"
   FocalLengthIn35mmFormat:
+    "$camera:lens=fisheye": "7.5 mm"
     "$camera:lens=om": "50 mm"
 blocked_tags:
   LensType: "NO-LENS"
