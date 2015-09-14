@@ -49,7 +49,13 @@ class Processor
     # some files may have been removed by now: https://bitbucket.org/jgilbert/flickrup/issue/1
     files = all_files.map { |x|
       if File.exist? x
-        TaggedFile.create(x)
+        begin
+          TaggedFile.create(x)
+        rescue => e
+          logger.error("Failed to load file #{x}: #{e}")
+          logger.info("Aborting run")
+          return false
+        end
       else
         logger.debug("File #{x} already removed, skipping.")
       end
