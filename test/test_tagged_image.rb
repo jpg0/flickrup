@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'test/unit'
 require "mocha/setup"
-require 'flickrup/tagged_image'
+require 'flickrup/filetype/tagged_image'
 
 class TaggedImageTest < Test::Unit::TestCase
   def test_no_tags

@@ -1,4 +1,5 @@
 require 'fileutils'
+require "flickrup/filetype/tagged_file"
 require "flickrup/logging"
 require "flickrup/tag_set"
 require "flickrup/processing_context"

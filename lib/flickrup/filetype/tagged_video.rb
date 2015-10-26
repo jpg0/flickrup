@@ -1,5 +1,6 @@
 require 'yaml'
 require 'flickrup/filetype/picasa_ini'
+require "flickrup/logging"
 
 class TaggedVideo < TaggedFile
   include Logging
