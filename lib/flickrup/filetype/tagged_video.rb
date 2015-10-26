@@ -17,7 +17,13 @@ class TaggedVideo < TaggedFile
 
   # Returns the value of a tag.
   def [] tag
-    @properties[tag]
+    vals = @properties[tag]
+    if tag == "keywords"
+      unless vals.nil?
+        vals = vals.split(",")
+      end
+    end
+    return vals
   end
 
   # Set the value of a tag.
