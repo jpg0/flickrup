@@ -2,16 +2,16 @@ package flickr
 
 import (
 	"gopkg.in/masci/flickr.v2"
-	"golang.org/x/net/context"
 	log "github.com/Sirupsen/logrus"
+	"github.com/jpg0/flickrup/filetype"
 )
 
 /*
 Returns whether file should be uploaded at all
  */
-func AddVisibility(uploadParams *flickr.UploadParams, ctx context.Context) bool {
+func AddVisibility(uploadParams *flickr.UploadParams, ctx *filetype.ProcessingContext) bool {
 
-	visibility := ctx.Value("visibility").(string)
+	visibility := ctx.Visibilty
 	switch visibility {
 	default:
 		panic("Unknown visibility: " + visibility)

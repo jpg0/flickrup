@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"gopkg.in/yaml.v2"
@@ -8,16 +8,14 @@ import (
 type Config struct {
 	WatchDir string `yaml:"watch_dir"`
 	APIKey string `yaml:"api_key"`
-	SharedSecret string
+	SharedSecret string `yaml:"shared_secret"`
 	ArchiveDir string `yaml:"archive_dir"`
 	TagsetPrefix string `yaml:"tagsetprefix"`
 	VisibilityPrefix string `yaml:"visibilityprefix"`
-	TagReplacements string `yaml:"tag_replacements"`
-	LensType map[string]string
-	FocalLength map[string]string
-	FocalLengthIn35mmFormat map[string]string
+	TagReplacements map[string]map[string]string `yaml:"tag_replacements"`
 	BlockedTags map[string]string `yaml:"blocked_tags"`
 	ConvertFiles map[string]string `yaml:"convert_files"`
+	TransferServicePassword string `yaml:"transfer_service_password"`
 }
 
 func Load(filepath string) (*Config, error) {

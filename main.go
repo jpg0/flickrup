@@ -4,6 +4,10 @@ import (
 	"github.com/urfave/cli"
 	"os"
 	"github.com/jpg0/flickrup/flickr"
+	"github.com/jpg0/flickrup/filetype"
+	flickrupconfig "github.com/jpg0/flickrup/config"
+
+	"fmt"
 )
 
 func main() {
@@ -11,54 +15,65 @@ func main() {
 	app.Name = "flickrup"
 	app.Usage = "Upload photos to Flickr"
 
-	app.Flags = []cli.Flag{
-		cli.StringFlag{
-			Name: "config",
-			Usage: "File path to configuration file",
+	app.Commands = []cli.Command{
+		cli.Command{
+			Name: "upload",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name: "config",
+					Usage: "File path to configuration file",
+				},
+				cli.StringFlag{
+					Name: "visibility",
+					Usage: "public|friends|family|private|offline",
+				},
+			},
+			Action: uploadFile,
 		},
-		cli.BoolFlag{
-			Name: "friends",
-			Usage: "Visible to friends only?",
-		},
-		cli.BoolFlag{
-			Name: "family",
-			Usage: "Visible to family only?",
-		},
-		cli.BoolFlag{
-			Name: "private",
-			Usage: "Visible to me only?",
-		},
-		cli.StringSliceFlag{
-			Name: "tags",
-			Usage: "tags for file",
-		},
-		cli.StringFlag{
-			Name: "password",
-			Usage: "password to authorise transfer",
+		cli.Command{
+			Name: "test",
+			Action: test,
 		},
 	}
 
-	app.Action = run
 	app.Run(os.Args)
 }
 
 
-func run(c *cli.Context) error {
+func uploadFile(c *cli.Context) error {
 
-	file, err := os.Open(c.Args().First())
+	config, err := flickrupconfig.Load(c.String("config"))
 
 	if err != nil {
 		return err
 	}
 
-	defer file.Close()
+	client, err := flickr.NewUploadClient(config.APIKey, config.SharedSecret)
 
-	return flickr.Transfer(
-		file,
-		c.StringSlice("tags"),
-		c.Bool("public"),
-		c.Bool("family"),
-		c.Bool("friend"),
-		c.String("password"),
-	)
+	if err != nil {
+		return err
+	}
+
+	taggedFile, err := filetype.NewTaggedImage(c.Args().First())
+
+	if err != nil {
+		return err
+	}
+
+	ctx := filetype.NewProcessingContext()
+
+	ctx.Visibilty = c.String("visibility")
+
+	err = client.Upload(taggedFile, ctx, config)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func test(c *cli.Context) error {
+	fmt.Println(os.ExpandEnv("${HOME}/flic"))
+	return nil
 }

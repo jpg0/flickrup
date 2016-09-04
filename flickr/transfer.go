@@ -24,9 +24,23 @@ type TransferRequest struct {
 	Validations                  *Validations
 }
 
-func Transfer(file *os.File, tags []string, isPublic bool, isFamily bool, isFriend bool, servicePassword string) error {
+func Transfer(filepath string, tags []string, isPublic bool, isFamily bool, isFriend bool, servicePassword string) error {
 
-	title := file.Name()[strings.Index(file.Name(), "/Camera Uploads/"):]
+	file, err := os.Open(filepath)
+
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	idx := strings.Index(filepath, "/Camera Uploads/")
+
+	if idx == -1 {
+		return errors.New("Cannot find /Camera Uploads/ in path")
+	}
+
+	title := filepath[idx:]
 
 	stat, err := file.Stat()
 
