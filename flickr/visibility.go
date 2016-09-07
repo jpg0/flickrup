@@ -3,13 +3,13 @@ package flickr
 import (
 	"gopkg.in/masci/flickr.v2"
 	log "github.com/Sirupsen/logrus"
-	"github.com/jpg0/flickrup/filetype"
+	"github.com/jpg0/flickrup/processing"
 )
 
 /*
 Returns whether file should be uploaded at all
  */
-func AddVisibility(uploadParams *flickr.UploadParams, ctx *filetype.ProcessingContext) bool {
+func AddVisibility(uploadParams *flickr.UploadParams, ctx *processing.ProcessingContext) bool {
 
 	visibility := ctx.Visibilty
 	switch visibility {

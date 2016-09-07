@@ -4,11 +4,17 @@ import (
 	"fmt"
 	"github.com/jpg0/goexiftool"
 	"path/filepath"
+	"time"
+	"github.com/jpg0/flickrup/processing"
 )
 
 type TaggedImage struct {
 	filepath string
 	img goexiftool.Image
+}
+
+type TaggedImageKeywords struct {
+	img TaggedImage
 }
 
 func (ti TaggedImage) Name() string {
@@ -19,8 +25,30 @@ func (ti TaggedImage) Filepath() string {
 	return ti.filepath
 }
 
-func (ti TaggedImage) Keywords() []string {
-	kw := ti.img.Tags()["Keywords"]
+func (ti TaggedImage) StringTag(name string) string {
+	return ti.img.Tags()[name].(string)
+}
+
+func (ti TaggedImage) Keywords() processing.Keywords {
+	return TaggedImageKeywords{img: ti}
+}
+
+func (ti TaggedImage) RealDateTaken() time.Time {
+	rv := ti.img.Tags()["DateTimeOriginal"]
+
+	if rv == nil {
+		rv = ti.img.Tags()["ModifyDate"]
+	}
+
+	if rv == nil {
+		rv = ti.img.Tags()["FileModifyDate"]
+	}
+
+	return rv.(time.Time)
+}
+
+func (tik TaggedImageKeywords) All() []string {
+	kw := tik.img.img.Tags()["Keywords"]
 
 	switch kw.(type) {
 	default:
@@ -32,6 +60,14 @@ func (ti TaggedImage) Keywords() []string {
 	case []string:
 		return kw.([]string)
 	}
+}
+
+func (tik TaggedImageKeywords) Replace(old string, new string) error {
+	panic("no implemented")
+}
+
+func (tik TaggedImage) ReplaceStringTag(old string, new string) error {
+	panic("no implemented")
 }
 
 func NewTaggedImage(filepath string) (*TaggedImage, error) {

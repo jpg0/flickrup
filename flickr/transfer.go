@@ -24,12 +24,16 @@ type TransferRequest struct {
 	Validations                  *Validations
 }
 
-func Transfer(filepath string, tags []string, isPublic bool, isFamily bool, isFriend bool, servicePassword string) error {
+type TransferResponse struct {
+	Id string
+}
+
+func Transfer(filepath string, tags []string, isPublic bool, isFamily bool, isFriend bool, servicePassword string) (string, error) {
 
 	file, err := os.Open(filepath)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	defer file.Close()
@@ -37,7 +41,7 @@ func Transfer(filepath string, tags []string, isPublic bool, isFamily bool, isFr
 	idx := strings.Index(filepath, "/Camera Uploads/")
 
 	if idx == -1 {
-		return errors.New("Cannot find /Camera Uploads/ in path")
+		return "", errors.New("Cannot find /Camera Uploads/ in path")
 	}
 
 	title := filepath[idx:]
@@ -45,7 +49,7 @@ func Transfer(filepath string, tags []string, isPublic bool, isFamily bool, isFr
 	stat, err := file.Stat()
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	mtime := dropbox.DBTime(stat.ModTime())
@@ -66,14 +70,12 @@ func Transfer(filepath string, tags []string, isPublic bool, isFamily bool, isFr
 	body, err := json.Marshal(transferRequest)
 
 	if err != nil {
-		return err
+		return "", err
 	}
-
-	//fmt.Print(string(body))
 
 	req, err := http.NewRequest("POST", "http://d2f-transfer.appspot.com/transfer", bytes.NewReader(body))
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -85,17 +87,22 @@ func Transfer(filepath string, tags []string, isPublic bool, isFamily bool, isFr
 	res, err := http.DefaultClient.Do(req)
 
 	if err != nil {
-		return err
+		return "", err
 	}
+
+	resBody, err := ioutil.ReadAll(res.Body)
 
 	if res.StatusCode != http.StatusCreated {
-		body, err := ioutil.ReadAll(res.Body)
 		if err != nil {
-			return err
+			return "", err
 		}
 
-		return errors.New(fmt.Sprintf("%v: %v", res.StatusCode, string(body)))
+		return "", errors.New(fmt.Sprintf("%v: %v", res.StatusCode, string(resBody)))
 	}
 
-	return nil
+	transferResponse := TransferResponse{}
+
+	json.Unmarshal(resBody, transferResponse)
+
+	return transferResponse.Id, nil
 }

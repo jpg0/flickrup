@@ -8,6 +8,9 @@ import (
 	flickrupconfig "github.com/jpg0/flickrup/config"
 
 	"fmt"
+	"github.com/jpg0/flickrup/processing"
+	"github.com/jpg0/flickrup/archive"
+	"github.com/jpg0/flickrup/tags"
 )
 
 func main() {
@@ -48,29 +51,54 @@ func uploadFile(c *cli.Context) error {
 		return err
 	}
 
-	client, err := flickr.NewUploadClient(config.APIKey, config.SharedSecret)
-
-	if err != nil {
-		return err
-	}
-
 	taggedFile, err := filetype.NewTaggedImage(c.Args().First())
 
 	if err != nil {
 		return err
 	}
 
-	ctx := filetype.NewProcessingContext()
+	ctx := processing.NewProcessingContext()
 
 	ctx.Visibilty = c.String("visibility")
 
-	err = client.Upload(taggedFile, ctx, config)
+	ctx.File = taggedFile
+
+	ctx.Config = config
+
+	processor, err := ProcessorPipeline(config)
+
+	if err != nil {
+		return err
+	}
+
+	err = processor(ctx)
 
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func ProcessorPipeline(config *flickrupconfig.Config) (processing.Processor, error) {
+
+	client, err := flickr.NewUploadClient(config)
+
+	if err != nil {
+		return nil, err
+	}
+
+	tagSetProcessor, err := tags.NewTagSetProcessor(config)
+	rewriter := tags.NewRewriter()
+
+	return processing.Chain(
+		processing.AsStage(rewriter.MaybeRewrite),
+		processing.AsStage(tags.MaybeBlock),
+		processing.AsStage(tags.MaybeReplace),
+		tagSetProcessor.Stage(),
+		client.Stage(),
+		processing.AsStage(archive.Archive),
+	), nil
 }
 
 func test(c *cli.Context) error {
