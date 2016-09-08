@@ -10,7 +10,8 @@ type CachedTaggedFile struct {
 	filepath string
 	stringtags map[string]string
 	keywords *CachedKeywords
-	dateTaken time.Time
+	realDateTaken time.Time
+	//realDateTaken time.Time
 }
 
 type CachedKeywords struct {
@@ -44,20 +45,32 @@ func (ftf CachedTaggedFile) StringTag(name string) string {
 	return ftf.stringtags[name]
 }
 
+func (ftf CachedTaggedFile) ReplaceStringTag(old string, new string) error {
+
+	for i, word := range ftf.stringtags {
+		if word == old {
+			ftf.stringtags[i] = new
+			return nil//only the first
+		}
+	}
+
+	return nil
+}
+
 func (ftf CachedTaggedFile) Keywords() processing.Keywords {
 	return ftf.keywords
 }
 
-func (ftf CachedTaggedFile) DateTaken() time.Time {
-	return ftf.dateTaken
+func (ftf CachedTaggedFile) RealDateTaken() time.Time {
+	return ftf.realDateTaken
 }
 
-func NewFakeTaggedFile(name string, filepath string, stringtags map[string]string, keywords []string, dateTaken time.Time) *CachedTaggedFile {
+func NewFakeTaggedFile(name string, filepath string, stringtags map[string]string, keywords []string, realDateTaken time.Time) *CachedTaggedFile {
 	return &CachedTaggedFile{
 		name: name,
 		filepath: filepath,
 		stringtags: stringtags,
 		keywords: &CachedKeywords{keywords:keywords},
-		dateTaken: dateTaken,
+		realDateTaken: realDateTaken,
 	}
 }
