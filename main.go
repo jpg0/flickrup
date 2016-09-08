@@ -11,6 +11,10 @@ import (
 	"github.com/jpg0/flickrup/processing"
 	"github.com/jpg0/flickrup/archive"
 	"github.com/jpg0/flickrup/tags"
+	"github.com/jpg0/flickrup/listen"
+	"github.com/juju/errors"
+	log "github.com/Sirupsen/logrus"
+	"strings"
 )
 
 func main() {
@@ -34,6 +38,20 @@ func main() {
 			Action: uploadFile,
 		},
 		cli.Command{
+			Name: "watch",
+			Flags: []cli.Flag{
+				cli.StringFlag{
+					Name: "config",
+					Usage: "File path to configuration file",
+				},
+				cli.StringFlag{
+					Name: "loglevel",
+					Usage: "Logging level",
+				},
+			},
+			Action: verbose(watch),
+		},
+		cli.Command{
 			Name: "test",
 			Action: test,
 		},
@@ -42,6 +60,48 @@ func main() {
 	app.Run(os.Args)
 }
 
+func verbose(next func(*cli.Context) error) func(*cli.Context) error {
+	return func(c *cli.Context) error {
+		err := next(c)
+
+		if err != nil {
+			fmt.Println(errors.ErrorStack(err))
+		}
+
+		return err
+	}
+}
+
+func initLogging(level string) error {
+	switch strings.ToLower(level) {
+	case "debug": log.SetLevel(log.DebugLevel)
+	case "info": log.SetLevel(log.InfoLevel)
+	case "warn": log.SetLevel(log.WarnLevel)
+	case "error": log.SetLevel(log.ErrorLevel)
+	case "fatal": log.SetLevel(log.FatalLevel)
+	default:
+		return errors.Errorf("Unknown logging level: %v", level)
+	}
+
+	return nil
+}
+
+func watch(c *cli.Context) error {
+
+	err := initLogging(c.String("loglevel"))
+
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	config, err := flickrupconfig.Load(c.String("config"))
+
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	return listen.Watch(config)
+}
 
 func uploadFile(c *cli.Context) error {
 
@@ -85,7 +145,7 @@ func ProcessorPipeline(config *flickrupconfig.Config) (processing.Processor, err
 	client, err := flickr.NewUploadClient(config)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Trace(err)
 	}
 
 	tagSetProcessor, err := tags.NewTagSetProcessor(config)

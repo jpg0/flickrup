@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"time"
 	"github.com/jpg0/flickrup/processing"
+	"github.com/juju/errors"
 )
 
 type TaggedImage struct {
@@ -74,7 +75,7 @@ func NewTaggedImage(filepath string) (*TaggedImage, error) {
 	img, err := goexiftool.NewImage(filepath)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Trace(err)
 	}
 
 	return &TaggedImage{

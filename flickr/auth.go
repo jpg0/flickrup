@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 	"gopkg.in/masci/flickr.v2"
+	"github.com/juju/errors"
 )
 
 func getToken(client *flickr.FlickrClient) (*flickr.OAuthToken, error) {
@@ -17,7 +18,7 @@ func getToken(client *flickr.FlickrClient) (*flickr.OAuthToken, error) {
 		token, err := requestToken(client)
 
 		if err != nil {
-			return nil, err
+			return nil, errors.Trace(err)
 		}
 
 		bytes, err := yaml.Marshal(token)
@@ -25,7 +26,7 @@ func getToken(client *flickr.FlickrClient) (*flickr.OAuthToken, error) {
 		err = ioutil.WriteFile(filepath, bytes, 0644)
 
 		if err != nil {
-			return nil, err
+			return nil, errors.Trace(err)
 		}
 
 		return token, nil
@@ -37,7 +38,7 @@ func getToken(client *flickr.FlickrClient) (*flickr.OAuthToken, error) {
 		defer file.Close()
 
 		if err != nil {
-			return nil, err
+			return nil, errors.Trace(err)
 		}
 
 		tokens := new(flickr.OAuthToken)
@@ -45,13 +46,13 @@ func getToken(client *flickr.FlickrClient) (*flickr.OAuthToken, error) {
 		bytes, err := ioutil.ReadAll(file)
 
 		if err != nil {
-			return nil, err
+			return nil, errors.Trace(err)
 		}
 
 		err = yaml.Unmarshal(bytes, tokens)
 
 		if err != nil {
-			return nil, err
+			return nil, errors.Trace(err)
 		}
 
 		return tokens, nil
@@ -62,13 +63,13 @@ func requestToken(client *flickr.FlickrClient) (*flickr.OAuthToken, error){
 	requestToken, err := flickr.GetRequestToken(client)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Trace(err)
 	}
 
 	url, err := flickr.GetAuthorizeUrl(client, requestToken)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Trace(err)
 	}
 
 	fmt.Println("Open this url in your process to complete the authentication process: ", url)

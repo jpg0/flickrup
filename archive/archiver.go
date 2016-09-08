@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"github.com/jpg0/flickrup/processing"
+	"github.com/juju/errors"
 )
 
 func Archive(ctx *processing.ProcessingContext) error {
@@ -17,7 +18,7 @@ func archiveFileByDate(file string, toDir string, date time.Time, subdir string)
 	err := os.MkdirAll(targetDir, 0755)
 
 	if err != nil {
-		return err
+		return errors.Trace(err)
 	}
 
 	newName := fmt.Sprintf("%v/%v", targetDir, filepath.Base(file))

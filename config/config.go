@@ -3,6 +3,7 @@ package config
 import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"github.com/juju/errors"
 )
 
 type Config struct {
@@ -22,7 +23,7 @@ func Load(filepath string) (*Config, error) {
 	bytes, err := ioutil.ReadFile(filepath)
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Trace(err)
 	}
 
 	rv := new(Config)
