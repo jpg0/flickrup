@@ -12,6 +12,7 @@ type ProcessingContext struct {
 	ArchiveSubdir string
 	UploadedId string
 	OverrideDateTaken time.Time
+	ArchivedAs string
 }
 
 func (pc ProcessingContext) DateTaken() time.Time {

@@ -10,6 +10,8 @@ import (
 	flickrupconfig "github.com/jpg0/flickrup/config"
 	log "github.com/Sirupsen/logrus"
 	"github.com/jpg0/flickrup/flickr"
+	"github.com/jpg0/flickrup/filetype"
+	"time"
 )
 
 func CreateAndRunPipeline(config *config.Config) error {
@@ -21,13 +23,19 @@ func CreateAndRunPipeline(config *config.Config) error {
 
 	completions := make(chan struct{})
 
-	l := listen.NewListener(triggerChannel, completions)
+	l := listen.NewListener(listen.Coalesce(triggerChannel), completions)
 
 	processor, err := ProcessorPipeline(config)
 
 	for {
 		select {
-		case <-l.BeginChannel():
+		case beginEvent := <-l.BeginChannel():
+
+			if beginEvent.Direct {
+				log.Infof("Waiting for 5 mins...")
+				time.Sleep(time.Minute * 5)
+			}
+
 			for SafePerformRun(processor, config, completions) {
 				log.Infof("Rerunning...")
 			}
@@ -56,6 +64,7 @@ func ProcessorPipeline(config *flickrupconfig.Config, additionalStages ...proces
 		processing.AsStage(tags.MaybeBlock),
 		processing.AsStage(tags.MaybeReplace),
 		tagSetProcessor.Stage(),
+		filetype.SidecarStage(),
 		client.Stage(),
 		processing.AsStage(archive.Archive),
 	}

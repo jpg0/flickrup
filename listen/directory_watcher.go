@@ -17,8 +17,8 @@ func Watch(cfg *config.Config) (<-chan struct {}, error){
 	go func() {
 		for {
 			select {
-			case e := <-watcher.Events:
-				log.Debugf("Detected Change:", e)
+			case <-watcher.Events:
+				//log.Debugf("Detected Change:", e)
 				c <- struct {}{}
 			case err := <-watcher.Errors:
 				log.Error("error:", err)

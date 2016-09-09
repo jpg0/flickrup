@@ -11,7 +11,7 @@ import (
 )
 
 func TaggedFileFactory() *processing.TaggedFileFactory {
-	return filetype.TaggedImageFactory()
+	return processing.MergeTaggedFileFactories(filetype.TaggedImageFactory(), filetype.TaggedVideoFactory())
 }
 
 type ByDateTaken []processing.TaggedFile

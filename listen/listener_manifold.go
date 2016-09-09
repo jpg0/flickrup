@@ -5,13 +5,15 @@ import log "github.com/Sirupsen/logrus"
 type Listener struct {
 	processing bool
 	queued     bool
-	begin      chan struct{}
+	begin      chan BeginEvent
 }
 
-// Op describes a set of file operations.
 type Update uint32
 
-// These are the generalized file operations that can trigger a notification.
+type BeginEvent struct {
+	Direct bool //else as deferred
+}
+
 const (
 	Triggered Update = 1 << iota
 	ProcessingComplete
@@ -19,7 +21,7 @@ const (
 
 func NewListener(triggers <-chan struct{}, completions <-chan struct{}) *Listener {
 
-	begin := make(chan struct{}, 1)
+	begin := make(chan BeginEvent, 1)
 
 	l := &Listener{begin:begin}
 
@@ -38,7 +40,7 @@ func NewListener(triggers <-chan struct{}, completions <-chan struct{}) *Listene
 	return l
 }
 
-func (l *Listener) BeginChannel() <-chan struct{} {
+func (l *Listener) BeginChannel() <-chan BeginEvent {
 	return l.begin
 }
 
@@ -57,7 +59,7 @@ func (l *Listener) changeOccurred(u Update) {
 		} else {
 			log.Debug("Processing triggered")
 			l.processing = true
-			l.begin <- struct{}{}
+			l.begin <- BeginEvent{true}
 		}
 	case ProcessingComplete:
 		if l.processing {
@@ -67,7 +69,7 @@ func (l *Listener) changeOccurred(u Update) {
 				log.Debug("Queued processing triggered")
 				l.queued = false
 				l.processing = true
-				l.begin <- struct{}{}
+				l.begin <- BeginEvent{false}
 			}
 		} else {
 			log.Errorf("Not marked as processing at completion of processing")

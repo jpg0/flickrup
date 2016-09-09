@@ -16,6 +16,16 @@ func (tff TaggedFileFactory) LoadTaggedFile(path string) (TaggedFile, error) {
 	return constructor(path)
 }
 
-func MergeTaggedFileFactories(factories ...TaggedFileFactory) {
+func MergeTaggedFileFactories(factories ...*TaggedFileFactory) *TaggedFileFactory {
+	constructors := make(map[string]func (filepath string) (TaggedFile, error))
 
+	for _, f := range factories {
+		for k, v := range f.Constructors {
+			constructors[k] = v
+		}
+	}
+
+	return &TaggedFileFactory{
+		Constructors: constructors,
+	}
 }
