@@ -71,7 +71,7 @@ func (tik TaggedImage) ReplaceStringTag(old string, new string) error {
 	panic("no implemented")
 }
 
-func NewTaggedImage(filepath string) (*TaggedImage, error) {
+func NewTaggedImage(filepath string) (processing.TaggedFile, error) {
 	img, err := goexiftool.NewImage(filepath)
 
 	if err != nil {
@@ -82,4 +82,13 @@ func NewTaggedImage(filepath string) (*TaggedImage, error) {
 		filepath: filepath,
 		img: img,
 	}, nil
+}
+
+func TaggedImageFactory() *processing.TaggedFileFactory {
+	return &processing.TaggedFileFactory{
+		Constructors: map[string]func (filepath string) (processing.TaggedFile, error) {
+			"jpg": NewTaggedImage,
+			"jpeg": NewTaggedImage,
+		},
+	}
 }

@@ -3,17 +3,10 @@ package main
 import (
 	"github.com/urfave/cli"
 	"os"
-	"github.com/jpg0/flickrup/flickr"
-	"github.com/jpg0/flickrup/filetype"
-	flickrupconfig "github.com/jpg0/flickrup/config"
-
 	"fmt"
-	"github.com/jpg0/flickrup/processing"
-	"github.com/jpg0/flickrup/archive"
-	"github.com/jpg0/flickrup/tags"
-	"github.com/jpg0/flickrup/listen"
 	"github.com/juju/errors"
 	log "github.com/Sirupsen/logrus"
+	flickrupconfig "github.com/jpg0/flickrup/config"
 	"strings"
 )
 
@@ -23,21 +16,7 @@ func main() {
 	app.Usage = "Upload photos to Flickr"
 
 	app.Commands = []cli.Command{
-		cli.Command{
-			Name: "upload",
-			Flags: []cli.Flag{
-				cli.StringFlag{
-					Name: "config",
-					Usage: "File path to configuration file",
-				},
-				cli.StringFlag{
-					Name: "visibility",
-					Usage: "public|friends|family|private|offline",
-				},
-			},
-			Action: uploadFile,
-		},
-		cli.Command{
+		{
 			Name: "watch",
 			Flags: []cli.Flag{
 				cli.StringFlag{
@@ -47,11 +26,12 @@ func main() {
 				cli.StringFlag{
 					Name: "loglevel",
 					Usage: "Logging level",
+					Value: "info",
 				},
 			},
 			Action: verbose(watch),
 		},
-		cli.Command{
+		{
 			Name: "test",
 			Action: test,
 		},
@@ -100,65 +80,7 @@ func watch(c *cli.Context) error {
 		return errors.Trace(err)
 	}
 
-	return listen.Watch(config)
-}
-
-func uploadFile(c *cli.Context) error {
-
-	config, err := flickrupconfig.Load(c.String("config"))
-
-	if err != nil {
-		return err
-	}
-
-	taggedFile, err := filetype.NewTaggedImage(c.Args().First())
-
-	if err != nil {
-		return err
-	}
-
-	ctx := processing.NewProcessingContext()
-
-	ctx.Visibilty = c.String("visibility")
-
-	ctx.File = taggedFile
-
-	ctx.Config = config
-
-	processor, err := ProcessorPipeline(config)
-
-	if err != nil {
-		return err
-	}
-
-	err = processor(ctx)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func ProcessorPipeline(config *flickrupconfig.Config) (processing.Processor, error) {
-
-	client, err := flickr.NewUploadClient(config)
-
-	if err != nil {
-		return nil, errors.Trace(err)
-	}
-
-	tagSetProcessor, err := tags.NewTagSetProcessor(config)
-	rewriter := tags.NewRewriter()
-
-	return processing.Chain(
-		processing.AsStage(rewriter.MaybeRewrite),
-		processing.AsStage(tags.MaybeBlock),
-		processing.AsStage(tags.MaybeReplace),
-		tagSetProcessor.Stage(),
-		client.Stage(),
-		processing.AsStage(archive.Archive),
-	), nil
+	return CreateAndRunPipeline(config)
 }
 
 func test(c *cli.Context) error {

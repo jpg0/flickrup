@@ -7,23 +7,19 @@ import (
 	"github.com/juju/errors"
 )
 
-func Watch(cfg *config.Config) error {
+func Watch(cfg *config.Config) (<-chan struct {}, error){
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		return errors.Trace(err)
+		return nil, errors.Trace(err)
 	}
-	defer watcher.Close()
+	c := make(chan struct{})
 
-	done := make(chan bool)
 	go func() {
 		for {
 			select {
-			case event := <-watcher.Events:
-				log.Debug("event:", event)
-				if event.Op&fsnotify.Write == fsnotify.Write {
-					log.Debug("modified file:", event.Name)
-					ChangeOccurred()
-				}
+			case e := <-watcher.Events:
+				log.Debugf("Detected Change:", e)
+				c <- struct {}{}
 			case err := <-watcher.Errors:
 				log.Error("error:", err)
 			}
@@ -32,13 +28,8 @@ func Watch(cfg *config.Config) error {
 
 	err = watcher.Add(cfg.WatchDir)
 	if err != nil {
-		return errors.Trace(err)
+		return nil, errors.Trace(err)
 	}
-	<-done
 
-	return nil
-}
-
-func ChangeOccurred() {
-
+	return c, nil
 }

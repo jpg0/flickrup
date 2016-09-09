@@ -22,8 +22,10 @@ func (pc ProcessingContext) DateTaken() time.Time {
 	}
 }
 
-func NewProcessingContext() *ProcessingContext {
+func NewProcessingContext(config *config.Config, file TaggedFile) *ProcessingContext {
 	return &ProcessingContext{
 		Visibilty: "public",
+		Config: config,
+		File: file,
 	}
 }
