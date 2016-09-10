@@ -11,11 +11,12 @@ type Listener struct {
 type Update uint32
 
 type BeginEvent struct {
-	Direct bool //else as deferred
+	AfterPause bool //else as deferred
 }
 
 const (
 	Triggered Update = 1 << iota
+	Requested
 	ProcessingComplete
 )
 
@@ -30,9 +31,10 @@ func NewListener(triggers <-chan struct{}, completions <-chan struct{}) *Listene
 		for {
 			select {
 			case <-completions:
-				l.changeOccurred(ProcessingComplete)
+				l.triggered(ProcessingComplete)
 			case <-triggers:
-				l.changeOccurred(Triggered)
+				log.Info("Change detected")
+				l.triggered(Triggered)
 			}
 		}
 	}()
@@ -45,21 +47,20 @@ func (l *Listener) BeginChannel() <-chan BeginEvent {
 }
 
 func (l *Listener) Trigger() {
-	l.changeOccurred(Triggered)
+	l.triggered(Requested)
 }
 
 //single threaded
-func (l *Listener) changeOccurred(u Update) {
-	log.Info("Change detected")
+func (l *Listener) triggered(u Update) {
 	switch u {
-	case Triggered:
+	case Triggered, Requested:
 		if l.processing {
 			log.Debug("Processing queued")
 			l.queued = true
 		} else {
 			log.Debug("Processing triggered")
 			l.processing = true
-			l.begin <- BeginEvent{true}
+			l.begin <- BeginEvent{u == Triggered}
 		}
 	case ProcessingComplete:
 		if l.processing {

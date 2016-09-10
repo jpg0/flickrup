@@ -50,7 +50,7 @@ func PerformRun(processor processing.Processor, config *config.Config) (bool, er
 	files := make([]processing.TaggedFile, 0)
 
 	for _, fileInfo := range fileInfos {
-		file, err := factory.LoadTaggedFile(fileInfo.Name())
+		file, err := factory.LoadTaggedFile(config.WatchDir + "/" + fileInfo.Name())
 
 		if err != nil {
 			log.Warnf("Failed to load file %v, ignoring", fileInfo.Name())
@@ -70,7 +70,8 @@ func PerformRun(processor processing.Processor, config *config.Config) (bool, er
 	if len(byDate) == 0 {
 		log.Info("No files selected for upload")
 		if len(files) > 0 {
-			log.Infof("Stopped on %v", byDate[0].Name())
+			log.Infof("Stopped on %v", files[0].Name())
+			return false, nil
 		}
 	} else {
 		log.Infof("Selected %v files for upload", len(byDate))

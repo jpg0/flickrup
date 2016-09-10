@@ -1,13 +1,23 @@
 package processing
 
-import "github.com/juju/errors"
+import (
+	"github.com/juju/errors"
+	"path/filepath"
+	"strings"
+)
 
 type TaggedFileFactory struct {
 	Constructors map[string]func (filepath string) (TaggedFile, error)
 }
 
 func (tff TaggedFileFactory) LoadTaggedFile(path string) (TaggedFile, error) {
-	constructor := tff.Constructors[path]
+	ext := strings.ToLower(filepath.Ext(path))
+
+	if len(ext) == 0 {
+		return nil, errors.Errorf("No constructor for file: %v", path)
+	}
+
+	constructor := tff.Constructors[ext[1:]]
 
 	if constructor == nil {
 		return nil, errors.Errorf("No constructor for file: %v", path)

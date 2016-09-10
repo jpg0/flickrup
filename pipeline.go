@@ -27,11 +27,15 @@ func CreateAndRunPipeline(config *config.Config) error {
 
 	processor, err := ProcessorPipeline(config)
 
+	// initial run
+	log.Infof("Triggering initial run...")
+	l.Trigger()
+
 	for {
 		select {
 		case beginEvent := <-l.BeginChannel():
 
-			if beginEvent.Direct {
+			if beginEvent.AfterPause {
 				log.Infof("Waiting for 5 mins...")
 				time.Sleep(time.Minute * 5)
 			}
@@ -41,9 +45,6 @@ func CreateAndRunPipeline(config *config.Config) error {
 			}
 		}
 	}
-
-	// initial run
-	l.Trigger()
 
 	return nil
 }

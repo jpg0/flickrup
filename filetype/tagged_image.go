@@ -1,13 +1,14 @@
 package filetype
 
 import (
-	"fmt"
 	"github.com/jpg0/goexiftool"
 	"path/filepath"
 	"time"
 	"github.com/jpg0/flickrup/processing"
 	"github.com/juju/errors"
 )
+
+const TIME_FORMAT = "2006:01:02 15:04:05"
 
 type TaggedImage struct {
 	filepath string
@@ -37,29 +38,34 @@ func (ti TaggedImage) Keywords() processing.Keywords {
 func (ti TaggedImage) RealDateTaken() time.Time {
 	rv := ti.img.Tags()["DateTimeOriginal"]
 
-	if rv == nil {
+	if rv == "" {
 		rv = ti.img.Tags()["ModifyDate"]
 	}
 
-	if rv == nil {
+	if rv == "" {
 		rv = ti.img.Tags()["FileModifyDate"]
 	}
 
-	return rv.(time.Time)
+	t, e := time.Parse(TIME_FORMAT, rv.(string))
+
+	if e != nil {
+		panic("Failed to parse time: " + rv.(string))
+	}
+
+	return t
 }
 
 func (tik TaggedImageKeywords) All() []string {
 	kw := tik.img.img.Tags()["Keywords"]
 
-	switch kw.(type) {
-	default:
-		panic(fmt.Sprintf("unexpected tag type %T", kw))
-	case nil:
-		return []string{""}
-	case string:
-		return []string{kw.(string)}
-	case []string:
-		return kw.([]string)
+	if s, ok := kw.(string); ok {
+		return []string{s}
+	} else if ss, ok := kw.([]interface{}); ok { //need to assert via []interface{}
+		rv := make([]string, len(ss))
+		for i, s := range ss { rv[i] = s.(string) }
+		return rv
+	} else { //assume unset
+		return []string{}
 	}
 }
 
