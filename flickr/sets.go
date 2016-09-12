@@ -8,13 +8,18 @@ import (
 	"errors"
 )
 
-type SetClient struct {
+type SetClient interface {
+	DateOfSet(setName string) (time.Time, error)
+	AddToSet(photoId string, setName string, datePhotoTaken time.Time) error
+}
+
+type FlickrSetClient struct {
 	flickrClient *flickr.FlickrClient
 	setIdToDate map[string]time.Time
 	setNameToId map[string]string
 }
 
-func NewSetClient(APIKey string, SharedSecret string) (*SetClient, error){
+func NewFlickrSetClient(APIKey string, SharedSecret string) (SetClient, error){
 	client := flickr.NewFlickrClient(APIKey, SharedSecret)
 	token, err := getToken(client)
 
@@ -25,14 +30,14 @@ func NewSetClient(APIKey string, SharedSecret string) (*SetClient, error){
 	client.OAuthToken = token.OAuthToken
 	client.OAuthTokenSecret = token.OAuthTokenSecret
 
-	return &SetClient{
+	return &FlickrSetClient{
 		flickrClient: client,
 		setIdToDate: make(map[string]time.Time),
 		setNameToId: make(map[string]string),
 	}, nil
 }
 
-func (client SetClient) DateOfSet(setName string) (time.Time, error) {
+func (client FlickrSetClient) DateOfSet(setName string) (time.Time, error) {
 	id, err := client.setIdFromName(setName)
 
 	if err != nil {
@@ -77,7 +82,7 @@ func (client SetClient) DateOfSet(setName string) (time.Time, error) {
 	return date, nil
 }
 
-func (client SetClient) setIdFromName(setName string) (string, error) {
+func (client FlickrSetClient) setIdFromName(setName string) (string, error) {
 	val := client.setNameToId[setName]
 
 	if val == "" {
@@ -101,7 +106,7 @@ func (client SetClient) setIdFromName(setName string) (string, error) {
 	return val, nil
 }
 
-func (client SetClient) AddToSet(photoId string, setName string, datePhotoTaken time.Time) error {
+func (client FlickrSetClient) AddToSet(photoId string, setName string, datePhotoTaken time.Time) error {
 	setId, err := client.setIdFromName(setName)
 
 	if err != nil {

@@ -25,6 +25,6 @@ func SidecarStage() func(ctx *processing.ProcessingContext, next processing.Proc
 }
 
 func writeSidecar(video *TaggedVideo, archived string) error {
-	data := fmt.Sprintf("keywords: %v", strings.Join(video.Keywords().All(), ","))
+	data := fmt.Sprintf("keywords: %v", strings.Join(video.Keywords().All().Slice(), ","))
 	return ioutil.WriteFile(archived + ".meta", []byte(data), 0644)
 }

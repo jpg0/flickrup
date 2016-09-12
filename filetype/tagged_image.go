@@ -35,7 +35,7 @@ func (ti TaggedImage) Keywords() processing.Keywords {
 	return TaggedImageKeywords{img: ti}
 }
 
-func (ti TaggedImage) RealDateTaken() time.Time {
+func (ti TaggedImage) DateTaken() time.Time {
 	rv := ti.img.Tags()["DateTimeOriginal"]
 
 	if rv == "" {
@@ -46,35 +46,86 @@ func (ti TaggedImage) RealDateTaken() time.Time {
 		rv = ti.img.Tags()["FileModifyDate"]
 	}
 
-	t, e := time.Parse(TIME_FORMAT, rv.(string))
+	timeString, ok := rv.(string)
 
-	if e != nil {
-		panic("Failed to parse time: " + rv.(string))
+	if ok {
+		t, e := time.Parse(TIME_FORMAT, timeString)
+
+		if e != nil {
+			panic("Failed to parse time: " + rv.(string))
+		}
+
+		return t
 	}
 
-	return t
+	timeUint64, ok := rv.(int64)
+
+	if ok {
+		if timeUint64 > 999999999 { //in millis
+			return time.Unix(timeUint64 / 1000, timeUint64 % 1000)
+		} else {
+			return time.Unix(timeUint64, 0)
+		}
+	}
+
+	return time.Time{}
 }
 
-func (tik TaggedImageKeywords) All() []string {
-	kw := tik.img.img.Tags()["Keywords"]
+func (tik TaggedImageKeywords) All() *processing.TagSet {
 
-	if s, ok := kw.(string); ok {
-		return []string{s}
-	} else if ss, ok := kw.([]interface{}); ok { //need to assert via []interface{}
-		rv := make([]string, len(ss))
-		for i, s := range ss { rv[i] = s.(string) }
-		return rv
-	} else { //assume unset
-		return []string{}
+	kw, err := tik.img.img.StringSlice("Keywords")
+
+	if err != nil {
+		panic("Failure reading keywords: " + err.Error())
 	}
+
+	sub, err := tik.img.img.StringSlice("Keywords")
+
+	if err != nil {
+		panic("Failure reading keywords: " + err.Error())
+	}
+
+	ts := processing.NewTagSet(kw)
+	ts.AddAll(processing.NewTagSet(sub))
+
+	return ts
 }
 
 func (tik TaggedImageKeywords) Replace(old string, new string) error {
-	panic("no implemented")
+
+	err := tik.writeKeywordReplacement(old, new)
+
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	return nil
 }
 
-func (tik TaggedImage) ReplaceStringTag(old string, new string) error {
-	panic("no implemented")
+func (tik TaggedImageKeywords) writeKeywordReplacement(old string, new string) error {
+	err := tik.img.img.RemoveTagValue("Keywords", old)
+	if err != nil { return errors.Trace(err) }
+
+	err = tik.img.img.AddTagValue("Keywords", new)
+	if err != nil { return errors.Trace(err) }
+
+	err = tik.img.img.RemoveTagValue("Subject", old)
+	if err != nil { return errors.Trace(err) }
+
+	err = tik.img.img.AddTagValue("Subject", new)
+	if err != nil { return errors.Trace(err) }
+
+	return nil
+}
+
+func (tik TaggedImage) ReplaceStringTag(name string, newValue string) error {
+	err := tik.img.RemoveTag(name)
+
+	if err != nil {
+		return errors.Trace(err)
+	}
+
+	return tik.img.AddTag(name, newValue)
 }
 
 func NewTaggedImage(filepath string) (processing.TaggedFile, error) {

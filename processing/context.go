@@ -15,9 +15,9 @@ type ProcessingContext struct {
 	ArchivedAs string
 }
 
-func (pc ProcessingContext) DateTaken() time.Time {
+func (pc ProcessingContext) DateTakenForArchive() time.Time {
 	if pc.OverrideDateTaken.IsZero() {
-		return pc.File.RealDateTaken()
+		return pc.File.DateTaken()
 	} else {
 		return pc.OverrideDateTaken
 	}

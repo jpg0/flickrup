@@ -11,14 +11,16 @@ import (
 
 func TestNoRewriteRequired(t *testing.T){
 
-	ctx := processing.NewProcessingContext()
-	ctx.Config = &config.Config{}
-	ctx.File = testlib.NewFakeTaggedFile("", "", nil, []string{"sharing:visibility=private"}, time.Time{})
+	config := &config.Config{}
+	file := testlib.NewFakeTaggedFile("", "", nil, []string{"sharing:visibility=private"}, time.Time{})
+
+	ctx := processing.NewProcessingContext(config, file)
+
 
 	NewRewriter().MaybeRewrite(ctx)
 
 	expected := []string{"sharing:visibility=private"}
-	actual := ctx.File.Keywords().All()
+	actual := ctx.File.Keywords().All().Slice()
 	if !reflect.DeepEqual(actual, expected) {
 		t.Errorf("Test failed, expected: '%s', got:  '%s'", expected, actual)
 	}
@@ -26,14 +28,15 @@ func TestNoRewriteRequired(t *testing.T){
 
 func TestRewriteRequired(t *testing.T){
 
-	ctx := processing.NewProcessingContext()
+	config := &config.Config{}
+	file := testlib.NewFakeTaggedFile("", "", nil, []string{"sharing:visibility::private"}, time.Time{})
 
-	ctx.File = testlib.NewFakeTaggedFile("", "", nil, []string{"sharing:visibility::private"}, time.Time{})
+	ctx := processing.NewProcessingContext(config, file)
 
 	NewRewriter().MaybeRewrite(ctx)
 
 	expected := []string{"sharing:visibility=private"}
-	actual := ctx.File.Keywords().All()
+	actual := ctx.File.Keywords().All().Slice()
 	if !reflect.DeepEqual(actual, expected) {
 		t.Errorf("Test failed, expected: '%s', got:  '%s'", expected, actual)
 	}

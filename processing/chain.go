@@ -8,6 +8,10 @@ func SuccessStage(_ *ProcessingContext) error {
 
 type Processor func(ctx *ProcessingContext) error
 
+func SuccessProcessor(ctx *ProcessingContext) error {
+	return nil
+}
+
 func Chain(stages ...Stage) Processor {
 
 	next := SuccessStage
@@ -18,8 +22,8 @@ func Chain(stages ...Stage) Processor {
 		}
 	}
 
-	for _, stage := range stages {
-		next = wrap(stage, next)
+	for i := len(stages)-1; i >= 0; i-- {
+		next = wrap(stages[i], next)
 	}
 
 	return next

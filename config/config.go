@@ -4,6 +4,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"github.com/juju/errors"
+	"strings"
 )
 
 type Config struct {
@@ -16,7 +17,23 @@ type Config struct {
 	TagReplacements map[string]map[string]string `yaml:"tag_replacements"`
 	BlockedTags map[string]string `yaml:"blocked_tags"`
 	ConvertFiles map[string]string `yaml:"convert_files"`
-	TransferServicePassword string `yaml:"transfer_service_password"`
+	TransferService *TransferService `yaml:"transfer_service"`
+}
+
+type TransferService struct {
+	Password string `yaml:"password"`
+	DropboxDirMapping map[string]string `yaml:"dropbox_dir_mapping"`
+}
+
+func (ts TransferService) MapDropboxPath(path string) string {
+
+	for from, to := range ts.DropboxDirMapping {
+		if strings.HasPrefix(path, from) {
+			return to + path[len(from):]
+		}
+	}
+
+	return path
 }
 
 func Load(filepath string) (*Config, error) {

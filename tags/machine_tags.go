@@ -18,10 +18,8 @@ func NewRewriter() *Rewriter {
 
 func (rw *Rewriter) MaybeRewrite(ctx *processing.ProcessingContext) error {
 
-	var updated string
-
-	for _, keyword := range ctx.File.Keywords().All() {
-		updated = rw.re.ReplaceAllString(keyword, "$1:$2=")
+	for _, keyword := range ctx.File.Keywords().All().Slice() {
+		updated := rw.re.ReplaceAllString(keyword, "$1:$2=")
 
 		if keyword != updated {
 			ctx.File.Keywords().Replace(keyword, updated)

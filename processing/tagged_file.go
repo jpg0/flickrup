@@ -9,13 +9,13 @@ type TaggedFile interface {
 	Filepath() string
 	Name() string
 	Keywords() Keywords
-	RealDateTaken() time.Time
+	DateTaken() time.Time
 	StringTag(name string) string
 	ReplaceStringTag(old string, new string) error
 }
 
 type Keywords interface {
-	All() []string
+	All() *TagSet
 	Replace(old string, new string) error
 }
 
@@ -25,7 +25,7 @@ type KeywordsHelper struct {
 
 func ValuesByPrefix(k Keywords, prefix string) []string {
 	values := make([]string, 0)
-	for _, v := range k.All() {
+	for _, v := range k.All().Slice() {
 		if strings.HasPrefix(v, prefix) {
 			values = append(values, v[len(prefix):])
 		}

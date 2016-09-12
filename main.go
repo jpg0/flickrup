@@ -8,6 +8,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	flickrupconfig "github.com/jpg0/flickrup/config"
 	"strings"
+	"github.com/jpg0/flickrup/flickr"
 )
 
 func main() {
@@ -84,6 +85,6 @@ func watch(c *cli.Context) error {
 }
 
 func test(c *cli.Context) error {
-	fmt.Println(os.ExpandEnv("${HOME}/flic"))
+	flickr.DT()
 	return nil
 }

@@ -10,8 +10,7 @@ import (
 
 func TestNoVisibilityRequired(t *testing.T){
 
-	ctx := processing.NewProcessingContext()
-	ctx.Config = &config.Config{}
+	ctx := processing.NewProcessingContext(&config.Config{}, nil)
 
 	ExtractVisibility(ctx)
 
@@ -24,12 +23,14 @@ func TestNoVisibilityRequired(t *testing.T){
 
 func TestPrivateVisibilityRequired(t *testing.T){
 
-	ctx := processing.NewProcessingContext()
-	ctx.Config = &config.Config{
+	config := &config.Config{
 		VisibilityPrefix: "sharing:visibility=",
 	}
 
-	ctx.File = testlib.NewFakeTaggedFile("", "", nil, []string{"sharing:visibility=private"}, time.Time{})
+	file := testlib.NewFakeTaggedFile("", "", nil, []string{"sharing:visibility=private"}, time.Time{})
+
+	ctx := processing.NewProcessingContext(config, file)
+
 
 	ExtractVisibility(ctx)
 

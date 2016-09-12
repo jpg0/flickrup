@@ -35,15 +35,16 @@ func (client *FlickrUploadClient) Upload(ctx *processing.ProcessingContext) erro
 
 	if !AddVisibility(params, ctx) {
 		//offline
+		log.Debug("Offline visibility specified; skipping upload")
 		return nil
 	}
 
 	file := ctx.File
 
-	params.Tags = file.Keywords().All()
+	params.Tags = file.Keywords().All().Slice()
 
-	if ctx.Config.TransferServicePassword != "" {
-		id, err := Transfer(file.Filepath(), params.Tags, params.IsPublic, params.IsFamily, params.IsFriend, ctx.Config.TransferServicePassword)
+	if ctx.Config.TransferService != nil {
+		id, err := Transfer(ctx.Config.TransferService.MapDropboxPath(file.Filepath()), params.Tags, params.IsPublic, params.IsFamily, params.IsFriend, ctx.Config.TransferService.Password)
 
 		if err != nil {
 			log.Infof("Failed to transfer: %v", err)
@@ -53,8 +54,6 @@ func (client *FlickrUploadClient) Upload(ctx *processing.ProcessingContext) erro
 			return nil
 		}
 	}
-
-
 
 	response, err := flickr.UploadFile(client.client, file.Filepath(), params)
 
@@ -66,7 +65,7 @@ func (client *FlickrUploadClient) Upload(ctx *processing.ProcessingContext) erro
 		log.Errorf("Failed to upload photo %v: %v", file.Name(), response)
 		return errors.New(response.ErrorMsg())
 	} else {
-		log.Debugf("Uploaded photo %v %v as %v", file.Name(), file.Keywords(), response.ID)
+		log.Debugf("Uploaded photo %v %v as %v", file.Name(), file.Keywords().All().Slice(), response.ID)
 		ctx.UploadedId = response.ID
 	}
 

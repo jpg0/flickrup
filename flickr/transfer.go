@@ -5,11 +5,14 @@ import (
 	"net/http"
 	"bytes"
 	"io/ioutil"
-	"errors"
 	"fmt"
 	"os"
 	"strings"
 	"github.com/jpg0/dropbox"
+	"github.com/juju/errors"
+	"github.com/jpg0/flickrup/config"
+	"gopkg.in/yaml.v2"
+	"github.com/Sirupsen/logrus"
 )
 
 type Validations struct {
@@ -28,23 +31,69 @@ type TransferResponse struct {
 	Id string
 }
 
+type DropboxConfig struct {
+	Personal DropboxAccount `json:"personal"`
+}
+
+type DropboxAccount struct {
+	Path string `json:"path"`
+	Host uint64 `json:"host"`
+	IsTeam bool `json:"is_team"`
+	SubscriptionType string `json:"subscription_type"`
+}
+
+func DropboxDir() (string, error) {
+	data, err := ioutil.ReadFile(os.ExpandEnv("${HOME}/.dropbox/info.json"))
+
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	dbc := &DropboxConfig{}
+
+	err = json.Unmarshal(data, dbc)
+
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	return dbc.Personal.Path, nil
+}
+
+func DT() {
+	dbc := &config.Config{
+		TransferService: &config.TransferService{
+			Password:"test",
+			DropboxDirMapping:map[string]string {"a": "b"},
+		},
+	}
+
+	b, _ := yaml.Marshal(dbc)
+
+	fmt.Println(string(b))
+}
+
 func Transfer(filepath string, tags []string, isPublic bool, isFamily bool, isFriend bool, servicePassword string) (string, error) {
 
 	file, err := os.Open(filepath)
 
 	if err != nil {
-		return "", err
+		return "", errors.Trace(err)
 	}
 
 	defer file.Close()
 
-	idx := strings.Index(filepath, "/Camera Uploads/")
+	root, err := DropboxDir()
 
-	if idx == -1 {
-		return "", errors.New("Cannot find /Camera Uploads/ in path")
+	if err != nil {
+		return "", errors.Trace(err)
 	}
 
-	title := filepath[idx:]
+	if !strings.HasPrefix(filepath, root) {
+		return "", errors.New("Cannot find dropbox dir in path")
+	}
+
+	title := filepath[len(root):]
 
 	stat, err := file.Stat()
 
@@ -55,7 +104,7 @@ func Transfer(filepath string, tags []string, isPublic bool, isFamily bool, isFr
 	mtime := dropbox.DBTime(stat.ModTime())
 	size := stat.Size()
 
-	transferRequest := TransferRequest{
+	transferRequest := &TransferRequest{
 		Title: title,
 		IsPublic: isPublic,
 		IsFamily: isFamily,
@@ -70,12 +119,12 @@ func Transfer(filepath string, tags []string, isPublic bool, isFamily bool, isFr
 	body, err := json.Marshal(transferRequest)
 
 	if err != nil {
-		return "", err
+		return "", errors.Trace(err)
 	}
 
 	req, err := http.NewRequest("POST", "http://d2f-transfer.appspot.com/transfer", bytes.NewReader(body))
 	if err != nil {
-		return "", err
+		return "", errors.Trace(err)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -87,22 +136,27 @@ func Transfer(filepath string, tags []string, isPublic bool, isFamily bool, isFr
 	res, err := http.DefaultClient.Do(req)
 
 	if err != nil {
-		return "", err
+		return "", errors.Trace(err)
 	}
 
 	resBody, err := ioutil.ReadAll(res.Body)
 
 	if res.StatusCode != http.StatusCreated {
 		if err != nil {
-			return "", err
+			return "", errors.Trace(err)
 		}
 
 		return "", errors.New(fmt.Sprintf("%v: %v", res.StatusCode, string(resBody)))
 	}
 
-	transferResponse := TransferResponse{}
+	transferResponse := &TransferResponse{}
 
-	json.Unmarshal(resBody, transferResponse)
+	err = json.Unmarshal(resBody, transferResponse)
+
+	if err != nil {
+		logrus.Debugf("Response was: %v", string(resBody))
+		return "", errors.Annotate(err, "Failed reading transfer response")
+	}
 
 	return transferResponse.Id, nil
 }

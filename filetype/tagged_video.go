@@ -39,18 +39,18 @@ func (ti TaggedVideo) Keywords() processing.Keywords {
 	return &TaggedVideoKeywords{v: ti}
 }
 
-func (ti TaggedVideo) RealDateTaken() time.Time {
+func (ti TaggedVideo) DateTaken() time.Time {
 	panic("Not implemented")
 }
 
-func (tik TaggedVideoKeywords) All() []string {
+func (tik TaggedVideoKeywords) All() *processing.TagSet {
 	k, err := tik.v.picasaIni.cached.GetKey("keywords")
 
 	if err != nil {
-		return make([]string, 0)
+		return processing.NewEmptyTagSet()
 	}
 
-	return k.Strings(",")
+	return processing.NewTagSet(k.Strings(","))
 }
 
 func (tik TaggedVideoKeywords) Replace(old string, new string) error {

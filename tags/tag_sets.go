@@ -7,12 +7,12 @@ import ("github.com/jpg0/flickrup/processing"
 )
 
 type TagSetProcessor struct {
-	setClient *flickr.SetClient
+	setClient flickr.SetClient
 }
 
 func NewTagSetProcessor(config *config.Config) (*TagSetProcessor, error) {
 
-	setClient, err := flickr.NewSetClient(config.APIKey, config.SharedSecret)
+	setClient, err := flickr.NewFlickrSetClient(config.APIKey, config.SharedSecret)
 
 	if err != nil {
 		return nil, err
@@ -29,6 +29,7 @@ func (tsp *TagSetProcessor) Stage() processing.Stage {
 		sets := processing.ValuesByPrefix(ctx.File.Keywords(), ctx.Config.TagsetPrefix)
 
 		if len(sets) > 0 {
+			log.Debugf("Detected membership of set(s) %v", sets)
 			ctx.ArchiveSubdir = sets[0]
 			date, err := tsp.setClient.DateOfSet(sets[0])
 
@@ -48,7 +49,7 @@ func (tsp *TagSetProcessor) Stage() processing.Stage {
 
 			for _, set := range sets {
 				log.Debugf("Adding %v to set: %v", ctx.File.Name(), set)
-				return tsp.setClient.AddToSet(ctx.UploadedId, set, ctx.DateTaken())
+				return tsp.setClient.AddToSet(ctx.UploadedId, set, ctx.File.DateTaken())
 			}
 		}
 

@@ -3,6 +3,7 @@ package tags
 import (
 	"github.com/jpg0/flickrup/processing"
 	"strings"
+	log "github.com/Sirupsen/logrus"
 )
 
 func MaybeReplace(ctx *processing.ProcessingContext) error {
@@ -11,36 +12,29 @@ func MaybeReplace(ctx *processing.ProcessingContext) error {
 
 	if replacements != nil {
 		for tagName, tagValueReplacements := range replacements {
-			existing := ctx.File.StringTag(tagName)
+			//existing := ctx.File.StringTag(tagName)
 
-			for key, value := range tagValueReplacements {
-				if strings.HasPrefix(key, "$") {
-					if contains(allKeywords, key[1:]) {
-						err := ctx.File.ReplaceStringTag(tagName, value)
+			for tagPresent, value := range tagValueReplacements {
 
-						if err != nil {
-							return err
-						}
-					}
-				} else if existing == key {
+				if !strings.HasPrefix(tagPresent, "$") {
+					panic("Static tag replacements not supported")
+				}
+
+				if allKeywords.Contains(tagPresent[1:]) {
+					log.Debugf("Setting tag %v to %v", tagName, value)
+
 					err := ctx.File.ReplaceStringTag(tagName, value)
 
 					if err != nil {
 						return err
 					}
+
+					break
 				}
+
 			}
 		}
 	}
 
 	return nil
-}
-
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
 }
