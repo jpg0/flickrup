@@ -126,7 +126,14 @@ func LoadFiles(files []os.FileInfo, factory *processing.TaggedFileFactory, confi
 				file, err := factory.LoadTaggedFile(config.WatchDir + "/" + job.Input.Name())
 
 				if err != nil {
-					log.Warnf("Failed to load file %v, ignoring", job.Input.Name())
+					switch e := err.(type) {
+						case *processing.NoConstructorAvailableError:
+							log.Debugf("Ignoring file %v", job.Input.Name())
+						default:
+							log.Warnf("Failed to load file %v, ignoring", job.Input.Name())
+							log.Warnf(e.Error())
+					}
+
 				} else {
 					processed[job.Index] = file
 				}

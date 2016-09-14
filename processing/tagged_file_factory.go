@@ -1,26 +1,34 @@
 package processing
 
 import (
-	"github.com/juju/errors"
 	"path/filepath"
 	"strings"
+	"fmt"
 )
 
 type TaggedFileFactory struct {
 	Constructors map[string]func (filepath string) (TaggedFile, error)
 }
 
+type NoConstructorAvailableError struct {
+	path string
+}
+
+func (ncae NoConstructorAvailableError) Error() string {
+	return fmt.Sprintf("No constructor for file: %v", ncae.path)
+}
+
 func (tff TaggedFileFactory) LoadTaggedFile(path string) (TaggedFile, error) {
 	ext := strings.ToLower(filepath.Ext(path))
 
 	if len(ext) == 0 {
-		return nil, errors.Errorf("No constructor for file: %v", path)
+		return nil, NoConstructorAvailableError{path}
 	}
 
 	constructor := tff.Constructors[ext[1:]]
 
 	if constructor == nil {
-		return nil, errors.Errorf("No constructor for file: %v", path)
+		return nil, NoConstructorAvailableError{path}
 	}
 
 	return constructor(path)
