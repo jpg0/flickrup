@@ -101,8 +101,9 @@ func NewTaggedVideo(filepath string) (processing.TaggedFile, error) {
 func TaggedVideoFactory() *processing.TaggedFileFactory {
 	return &processing.TaggedFileFactory{
 		Constructors: map[string]func (filepath string) (processing.TaggedFile, error) {
-			"mpg": NewTaggedVideo,
+			"mov": NewTaggedVideo,
 			"mpeg": NewTaggedVideo,
+			"mp4": NewTaggedVideo,
 		},
 	}
 }
