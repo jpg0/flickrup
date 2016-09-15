@@ -46,7 +46,7 @@ func (client FlickrSetClient) DateOfSet(setName string) (time.Time, error) {
 
 	date := client.setIdToDate[id]
 
-	if time.Time.IsZero(date) {
+	if date.IsZero() {
 		setResponse, err := photosets.GetInfo(client.flickrClient, true, id, "")
 
 		if err != nil {
