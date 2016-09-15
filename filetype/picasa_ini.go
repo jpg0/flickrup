@@ -3,6 +3,7 @@ package filetype
 import (
 	"gopkg.in/ini.v1"
 	"path/filepath"
+	"github.com/juju/errors"
 )
 
 type PicasaIni struct {
@@ -11,16 +12,16 @@ type PicasaIni struct {
 }
 
 func LoadPicasa(path string) (*PicasaIni, error) {
-	cfg, err := ini.Load(path + "/.picasa.ini")
+	cfg, err := ini.Load(filepath.Dir(path) + "/.picasa.ini")
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Annotate(err, "Loading Picasa config")
 	}
 
 	section, err := cfg.GetSection(filepath.Base(path))
 
 	if err != nil {
-		return nil, err
+		return nil, errors.Annotate(err, "Opening Picasa config section")
 	}
 
 	return &PicasaIni{

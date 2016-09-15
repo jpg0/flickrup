@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"fmt"
 	"strings"
+	"github.com/Sirupsen/logrus"
 )
 
 func SidecarStage() func(ctx *processing.ProcessingContext, next processing.Processor) error {
@@ -26,5 +27,9 @@ func SidecarStage() func(ctx *processing.ProcessingContext, next processing.Proc
 
 func writeSidecar(video *TaggedVideo, archived string) error {
 	data := fmt.Sprintf("keywords: %v", strings.Join(video.Keywords().All().Slice(), ","))
-	return ioutil.WriteFile(archived + ".meta", []byte(data), 0644)
+	sidecarPath := archived + ".meta"
+
+	logrus.Debugf("Writing sidecar as %v", sidecarPath)
+
+	return ioutil.WriteFile(sidecarPath, []byte(data), 0644)
 }

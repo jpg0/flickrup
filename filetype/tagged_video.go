@@ -6,11 +6,13 @@ import (
 	"github.com/jpg0/flickrup/processing"
 	"github.com/juju/errors"
 	"strings"
+	"os"
 )
 
 type TaggedVideo struct {
 	filepath string
 	picasaIni *PicasaIni
+	dateTaken time.Time
 }
 
 type TaggedVideoKeywords struct {
@@ -40,7 +42,7 @@ func (ti TaggedVideo) Keywords() processing.Keywords {
 }
 
 func (ti TaggedVideo) DateTaken() time.Time {
-	panic("Not implemented")
+	return ti.dateTaken
 }
 
 func (tik TaggedVideoKeywords) All() *processing.TagSet {
@@ -89,12 +91,19 @@ func NewTaggedVideo(filepath string) (processing.TaggedFile, error) {
 	picasa, err := LoadPicasa(filepath)
 
 	if err != nil {
-		return nil, errors.Trace(err)
+		return nil, errors.Annotate(err, "Reading Picasa config")
+	}
+
+	dateTaken, err := os.Stat(filepath)
+
+	if err != nil {
+		return nil, errors.Annotate(err, "Reading file info for date")
 	}
 
 	return &TaggedVideo{
 		picasaIni: picasa,
 		filepath: filepath,
+		dateTaken: dateTaken.ModTime(),
 	}, nil
 }
 

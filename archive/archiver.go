@@ -12,20 +12,34 @@ import (
 )
 
 func Archive(ctx *processing.ProcessingContext) error {
-	return archiveFileByDate(ctx.File.Filepath(), ctx.Config.ArchiveDir, ctx.DateTakenForArchive(), ctx.ArchiveSubdir)
-}
-
-func archiveFileByDate(file string, toDir string, date time.Time, subdir string) error {
-	targetDir := fmt.Sprintf("%v/%v/%.2d/%v", toDir, date.Year(), date.Month(), subdir)
-	err := os.MkdirAll(targetDir, 0755)
+	newPath, err := archiveFileByDate(ctx.File.Filepath(), ctx.Config.ArchiveDir, ctx.DateTakenForArchive(), ctx.ArchiveSubdir)
 
 	if err != nil {
 		return errors.Trace(err)
 	}
 
+	ctx.ArchivedAs = newPath
+
+	return nil
+}
+
+func archiveFileByDate(file string, toDir string, date time.Time, subdir string) (string, error) {
+	targetDir := fmt.Sprintf("%v/%v/%.2d/%v", toDir, date.Year(), date.Month(), subdir)
+	err := os.MkdirAll(targetDir, 0755)
+
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
 	newName := fmt.Sprintf("%v/%v", targetDir, filepath.Base(file))
 
-	return moveFile(file, newName)
+	err = moveFile(file, newName)
+
+	if err != nil {
+		return "", errors.Trace(err)
+	}
+
+	return newName, nil
 }
 
 func moveFile(from string, to string) error {
