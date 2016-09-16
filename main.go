@@ -5,39 +5,28 @@ import (
 	"os"
 	"fmt"
 	"github.com/juju/errors"
-	log "github.com/Sirupsen/logrus"
+	"github.com/Sirupsen/logrus"
 	flickrupconfig "github.com/jpg0/flickrup/config"
 	"strings"
-	"github.com/jpg0/flickrup/flickr"
 )
 
 func main() {
 	app := cli.NewApp()
 	app.Name = "flickrup"
 	app.Usage = "Upload photos to Flickr"
-
-	app.Commands = []cli.Command{
-		{
-			Name: "watch",
-			Flags: []cli.Flag{
-				cli.StringFlag{
-					Name: "config",
-					Usage: "File path to configuration file",
-				},
-				cli.StringFlag{
-					Name: "loglevel",
-					Usage: "Logging level",
-					Value: "info",
-				},
-			},
-			Action: verbose(watch),
+	app.Version = "1.0"
+	app.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name: "config",
+			Usage: "File path to configuration file",
 		},
-		{
-			Name: "test",
-			Action: test,
+		cli.StringFlag{
+			Name: "loglevel",
+			Usage: "Logging level",
+			Value: "info",
 		},
 	}
-
+	app.Action = verbose(watch)
 	app.Run(os.Args)
 }
 
@@ -55,11 +44,11 @@ func verbose(next func(*cli.Context) error) func(*cli.Context) error {
 
 func initLogging(level string) error {
 	switch strings.ToLower(level) {
-	case "debug": log.SetLevel(log.DebugLevel)
-	case "info": log.SetLevel(log.InfoLevel)
-	case "warn": log.SetLevel(log.WarnLevel)
-	case "error": log.SetLevel(log.ErrorLevel)
-	case "fatal": log.SetLevel(log.FatalLevel)
+	case "debug": logrus.SetLevel(logrus.DebugLevel)
+	case "info": logrus.SetLevel(logrus.InfoLevel)
+	case "warn": logrus.SetLevel(logrus.WarnLevel)
+	case "error": logrus.SetLevel(logrus.ErrorLevel)
+	case "fatal": logrus.SetLevel(logrus.FatalLevel)
 	default:
 		return errors.Errorf("Unknown logging level: %v", level)
 	}
@@ -82,9 +71,4 @@ func watch(c *cli.Context) error {
 	}
 
 	return CreateAndRunPipeline(config)
-}
-
-func test(c *cli.Context) error {
-	flickr.DT()
-	return nil
 }
