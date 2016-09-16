@@ -28,7 +28,13 @@ func (ti TaggedImage) Filepath() string {
 }
 
 func (ti TaggedImage) StringTag(name string) string {
-	return ti.img.Tags()[name].(string)
+	rv, ok := ti.img.Tags()[name].(string)
+
+	if ok {
+		return rv
+	} else {
+		return ""
+	}
 }
 
 func (ti TaggedImage) Keywords() processing.Keywords {

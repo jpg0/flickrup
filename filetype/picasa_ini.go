@@ -18,11 +18,7 @@ func LoadPicasa(path string) (*PicasaIni, error) {
 		return nil, errors.Annotate(err, "Loading Picasa config")
 	}
 
-	section, err := cfg.GetSection(filepath.Base(path))
-
-	if err != nil {
-		return nil, errors.Annotate(err, "Opening Picasa config section")
-	}
+	section := cfg.Section(filepath.Base(path))
 
 	return &PicasaIni{
 		ini: cfg,
