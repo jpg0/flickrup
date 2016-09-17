@@ -158,5 +158,7 @@ func Transfer(filepath string, tags []string, isPublic bool, isFamily bool, isFr
 		return "", errors.Annotate(err, "Failed reading transfer response")
 	}
 
+	logrus.Debugf("Successfully transfered %v", title)
+
 	return transferResponse.Id, nil
 }
