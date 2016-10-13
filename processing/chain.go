@@ -1,15 +1,15 @@
 package processing
 
-type Stage func(ctx *ProcessingContext, next Processor) error
+type Stage func(ctx *ProcessingContext, next Processor) ProcessingResult
 
-func SuccessStage(_ *ProcessingContext) error {
-	return nil
+func SuccessStage(_ *ProcessingContext) ProcessingResult {
+	return NewSuccessResult()
 }
 
-type Processor func(ctx *ProcessingContext) error
+type Processor func(ctx *ProcessingContext) ProcessingResult
 
-func SuccessProcessor(ctx *ProcessingContext) error {
-	return nil
+func SuccessProcessor(ctx *ProcessingContext) ProcessingResult {
+	return NewSuccessResult()
 }
 
 func Chain(stages ...Stage) Processor {
@@ -17,7 +17,7 @@ func Chain(stages ...Stage) Processor {
 	next := SuccessStage
 
 	wrap := func(stage Stage, processor Processor) Processor {
-		return func(ctx *ProcessingContext) error {
+		return func(ctx *ProcessingContext) ProcessingResult {
 			return stage(ctx, processor)
 		}
 	}
@@ -30,11 +30,11 @@ func Chain(stages ...Stage) Processor {
 }
 
 func AsStage(processor Processor) Stage {
-	return func(ctx *ProcessingContext, next Processor) error {
-		err := processor(ctx)
+	return func(ctx *ProcessingContext, next Processor) ProcessingResult {
+		result := processor(ctx)
 
-		if err != nil {
-			return err
+		if result.ResultType != SuccessResult {
+			return result
 		}
 
 		return next(ctx)

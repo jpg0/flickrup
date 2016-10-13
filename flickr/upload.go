@@ -10,7 +10,7 @@ import (
 )
 
 type UploadClient interface {
-	Upload(file processing.TaggedFile, ctx context.Context) error
+	Upload(file processing.TaggedFile, ctx context.Context) processing.ProcessingResult
 }
 
 type FlickrUploadClient struct {
@@ -18,25 +18,25 @@ type FlickrUploadClient struct {
 }
 
 func (client *FlickrUploadClient) Stage() processing.Stage {
-	return func(ctx *processing.ProcessingContext, next processing.Processor) error {
-		err := client.Upload(ctx)
+	return func(ctx *processing.ProcessingContext, next processing.Processor) processing.ProcessingResult {
+		result := client.Upload(ctx)
 
-		if err != nil {
-			return err
+		if result.ResultType != processing.SuccessResult {
+			return result
 		}
 
 		return next(ctx)
 	}
 }
 
-func (client *FlickrUploadClient) Upload(ctx *processing.ProcessingContext) error {
+func (client *FlickrUploadClient) Upload(ctx *processing.ProcessingContext) processing.ProcessingResult {
 
 	params := flickr.NewUploadParams()
 
 	if !AddVisibility(params, ctx) {
 		//offline
 		log.Debug("Offline visibility specified; skipping upload")
-		return nil
+		return processing.NewSuccessResult()
 	}
 
 	file := ctx.File
@@ -51,25 +51,25 @@ func (client *FlickrUploadClient) Upload(ctx *processing.ProcessingContext) erro
 			log.Info("Falling back to direct upload")
 		} else {
 			ctx.UploadedId = id
-			return nil
+			return processing.NewSuccessResult()
 		}
 	}
 
 	response, err := flickr.UploadFile(client.client, file.Filepath(), params)
 
 	if err != nil {
-		return err
+		return processing.NewErrorResult(err)
 	}
 
 	if response.HasErrors() {
 		log.Errorf("Failed to upload photo %v: %v", file.Name(), response)
-		return errors.New(response.ErrorMsg())
+		return processing.NewErrorResult(errors.New(response.ErrorMsg()))
 	} else {
 		log.Debugf("Uploaded photo %v %v as %v", file.Name(), file.Keywords().All().Slice(), response.ID)
 		ctx.UploadedId = response.ID
 	}
 
-	return nil
+	return processing.NewSuccessResult()
 }
 
 func NewUploadClient(config *config.Config) (*FlickrUploadClient, error){

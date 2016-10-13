@@ -26,7 +26,7 @@ func NewTagSetProcessor(config *config.Config) (*TagSetProcessor, error) {
 
 //must occur between upload & archive stages
 func (tsp *TagSetProcessor) Stage() processing.Stage {
-	return func(ctx *processing.ProcessingContext, next processing.Processor) error {
+	return func(ctx *processing.ProcessingContext, next processing.Processor) processing.ProcessingResult {
 
 		sets := processing.ValuesByPrefix(ctx.File.Keywords(), ctx.Config.TagsetPrefix)
 
@@ -41,7 +41,7 @@ func (tsp *TagSetProcessor) Stage() processing.Stage {
 					err := tsp.setClient.AddToSet(ctx.UploadedId, set, ctx.File.DateTaken())
 
 					if err != nil {
-						return errors.Annotate(err, "Adding photo to set")
+						return processing.NewErrorResult(errors.Annotate(err, "Adding photo to set"))
 					}
 				}
 
@@ -49,7 +49,7 @@ func (tsp *TagSetProcessor) Stage() processing.Stage {
 				date, err := tsp.setClient.DateOfSet(sets[0])
 
 				if err != nil {
-					return errors.Annotate(err, "Getting date of set")
+					return processing.NewErrorResult(errors.Annotate(err, "Getting date of set"))
 				}
 
 				ctx.OverrideDateTaken = date

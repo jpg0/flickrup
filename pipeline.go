@@ -26,6 +26,13 @@ func CreateAndRunPipeline(config *config.Config) error {
 	l := listen.NewListener(listen.Coalesce(triggerChannel), completions)
 
 	processor, err := ProcessorPipeline(config)
+	if err != nil {
+		return errors.Trace(err)
+	}
+	preprocessor, err := PreprocessorPipeline(config)
+	if err != nil {
+		return errors.Trace(err)
+	}
 
 	// initial run
 	log.Infof("Triggering initial run...")
@@ -40,7 +47,7 @@ func CreateAndRunPipeline(config *config.Config) error {
 				time.Sleep(time.Minute * 5)
 			}
 
-			for SafePerformRun(processor, config, completions) {
+			for SafePerformRun(preprocessor, processor, config, completions) {
 				log.Infof("Rerunning...")
 			}
 		}
@@ -76,10 +83,16 @@ func ProcessorPipeline(config *flickrupconfig.Config, additionalStages ...proces
 	), nil
 }
 
-func SafePerformRun(processor processing.Processor, config *config.Config, completions chan <- struct{}) bool {
+func PreprocessorPipeline(config *flickrupconfig.Config, additionalStages ...processing.Stage) (processing.Processor, error) {
+	return processing.Chain(
+		filetype.VideoConversionStage(),
+	), nil
+}
+
+func SafePerformRun(preprocessor processing.Processor, processor processing.Processor, config *config.Config, completions chan <- struct{}) bool {
 	defer func(){ completions <-struct {}{}}()
 
-	rerun, err := PerformRun(processor, config)
+	rerun, err := PerformRun(preprocessor, processor, config)
 
 	if err != nil {
 		log.Errorf("Run failed: ", err)

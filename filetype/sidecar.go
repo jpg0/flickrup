@@ -8,20 +8,26 @@ import (
 	"github.com/Sirupsen/logrus"
 )
 
-func SidecarStage() func(ctx *processing.ProcessingContext, next processing.Processor) error {
-	return func(ctx *processing.ProcessingContext, next processing.Processor) error {
+func SidecarStage() func(ctx *processing.ProcessingContext, next processing.Processor) processing.ProcessingResult {
+	return func(ctx *processing.ProcessingContext, next processing.Processor) processing.ProcessingResult {
 
-		err := next(ctx)
+		result := next(ctx)
 
-		if err == nil {
+		if result.ResultType != processing.SuccessResult {
 			asVideo, ok := ctx.File.(*TaggedVideo)
 
 			if ok {
-				return writeSidecar(asVideo, ctx.ArchivedAs)
+				err := writeSidecar(asVideo, ctx.ArchivedAs)
+
+				if err != nil {
+					return processing.NewErrorResult(err)
+				} else {
+					return processing.NewSuccessResult()
+				}
 			}
 		}
 
-		return err
+		return result
 	}
 }
 

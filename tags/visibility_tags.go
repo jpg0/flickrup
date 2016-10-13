@@ -5,7 +5,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-func ExtractVisibility(ctx *processing.ProcessingContext) error {
+func ExtractVisibility(ctx *processing.ProcessingContext) processing.ProcessingResult {
 	prefix := ctx.Config.VisibilityPrefix
 
 	if prefix != "" {
@@ -23,5 +23,5 @@ func ExtractVisibility(ctx *processing.ProcessingContext) error {
 		}
 	}
 
-	return nil
+	return processing.NewSuccessResult()
 }

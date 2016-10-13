@@ -11,16 +11,16 @@ import (
 	"io"
 )
 
-func Archive(ctx *processing.ProcessingContext) error {
+func Archive(ctx *processing.ProcessingContext) processing.ProcessingResult {
 	newPath, err := archiveFileByDate(ctx.File.Filepath(), ctx.Config.ArchiveDir, ctx.DateTakenForArchive(), ctx.ArchiveSubdir)
 
 	if err != nil {
-		return errors.Trace(err)
+		return processing.NewErrorResult(errors.Trace(err))
 	}
 
 	ctx.ArchivedAs = newPath
 
-	return nil
+	return processing.NewSuccessResult()
 }
 
 func archiveFileByDate(file string, toDir string, date time.Time, subdir string) (string, error) {

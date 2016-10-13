@@ -56,7 +56,7 @@ func takeWhile(files []processing.TaggedFile, f func(processing.TaggedFile) bool
 	return rv
 }
 
-func PerformRun(processor processing.Processor, config *config.Config) (bool, error) {
+func PerformRun(preprocessor processing.Processor, processor processing.Processor, config *config.Config) (bool, error) {
 
 	fileInfos, err := ioutil.ReadDir(config.WatchDir)
 
@@ -71,6 +71,27 @@ func PerformRun(processor processing.Processor, config *config.Config) (bool, er
 	files := LoadFiles(fileInfos, TaggedFileFactory(), config)
 
 	log.Infof("Scanned %v files", len(files))
+
+	var result processing.ProcessingResult
+
+	for _, toProcess := range files {
+		log.Debugf("Beginning preprocessing for %v", toProcess.Name())
+		ctx := processing.NewProcessingContext(config, toProcess)
+		result = preprocessor(ctx)
+
+		switch result.ResultType {
+		case processing.SuccessResult:
+			log.Debugf("Preprocessing complete for %v", toProcess.Name())
+		case processing.ErrorResult:
+			log.Warnf("Failed to preprocess %v", toProcess.Name())
+			log.Warn(result.Error)
+		case processing.RestartResult:
+			log.Infof("Restarting run after preprocessing %v", toProcess.Name())
+			return true, nil
+		}
+	}
+
+	log.Infof("Preprocessed %v files", len(files))
 
 	sort.Sort(ByDateTaken(files))
 
@@ -91,13 +112,17 @@ func PerformRun(processor processing.Processor, config *config.Config) (bool, er
 	for _, toProcess := range byDate {
 		log.Debugf("Beginning processing for %v", toProcess.Name())
 		ctx := processing.NewProcessingContext(config, toProcess)
-		err = processor(ctx)
+		result = processor(ctx)
 
-		if err != nil {
-			log.Warnf("Failed to process %v", toProcess.Name())
-			log.Warn(err)
-		} else {
+		switch result.ResultType {
+		case processing.SuccessResult:
 			log.Infof("Processing complete for %v", toProcess.Name())
+		case processing.ErrorResult:
+			log.Warnf("Failed to process %v", toProcess.Name())
+			log.Warn(result.Error)
+		case processing.RestartResult:
+			log.Infof("Restarting run after processing %v", toProcess.Name())
+			return true, nil
 		}
 	}
 

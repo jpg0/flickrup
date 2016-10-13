@@ -16,7 +16,7 @@ type Config struct {
 	VisibilityPrefix string `yaml:"visibilityprefix"`
 	TagReplacements map[string]map[string]string `yaml:"tag_replacements"`
 	BlockedTags map[string]string `yaml:"blocked_tags"`
-	ConvertFiles map[string]string `yaml:"convert_files"`
+	ConvertFiles map[string][]string `yaml:"convert_files"`
 	TransferService *TransferService `yaml:"transfer_service"`
 }
 

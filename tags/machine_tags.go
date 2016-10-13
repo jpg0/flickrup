@@ -16,7 +16,7 @@ func NewRewriter() *Rewriter {
 	}
 }
 
-func (rw *Rewriter) MaybeRewrite(ctx *processing.ProcessingContext) error {
+func (rw *Rewriter) MaybeRewrite(ctx *processing.ProcessingContext) processing.ProcessingResult {
 
 	for _, keyword := range ctx.File.Keywords().All().Slice() {
 		updated := rw.re.ReplaceAllString(keyword, "$1:$2=")
@@ -26,5 +26,5 @@ func (rw *Rewriter) MaybeRewrite(ctx *processing.ProcessingContext) error {
 		}
 	}
 
-	return nil
+	return processing.NewSuccessResult()
 }

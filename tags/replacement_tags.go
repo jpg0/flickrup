@@ -4,9 +4,10 @@ import (
 	"github.com/jpg0/flickrup/processing"
 	"strings"
 	log "github.com/Sirupsen/logrus"
+	"github.com/juju/errors"
 )
 
-func MaybeReplace(ctx *processing.ProcessingContext) error {
+func MaybeReplace(ctx *processing.ProcessingContext) processing.ProcessingResult {
 	replacements := ctx.Config.TagReplacements
 	allKeywords := ctx.File.Keywords().All()
 
@@ -26,7 +27,7 @@ func MaybeReplace(ctx *processing.ProcessingContext) error {
 					err := ctx.File.ReplaceStringTag(tagName, value)
 
 					if err != nil {
-						return err
+						return processing.NewErrorResult(errors.Annotate(err, "Replacing string tag"))
 					}
 
 					break
@@ -36,5 +37,5 @@ func MaybeReplace(ctx *processing.ProcessingContext) error {
 		}
 	}
 
-	return nil
+	return processing.NewSuccessResult()
 }
