@@ -1,28 +1,29 @@
 package config
 
 import (
-	"gopkg.in/yaml.v2"
+	//"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"github.com/juju/errors"
 	"strings"
+	"encoding/json"
 )
 
 type Config struct {
-	WatchDir string `yaml:"watch_dir"`
-	APIKey string `yaml:"api_key"`
-	SharedSecret string `yaml:"shared_secret"`
-	ArchiveDir string `yaml:"archive_dir"`
-	TagsetPrefix string `yaml:"tagsetprefix"`
-	VisibilityPrefix string `yaml:"visibilityprefix"`
-	TagReplacements map[string]map[string]string `yaml:"tag_replacements"`
-	BlockedTags map[string]string `yaml:"blocked_tags"`
-	ConvertFiles map[string][]string `yaml:"convert_files"`
-	TransferService *TransferService `yaml:"transfer_service"`
+	WatchDir string `json:"watch_dir"`
+	APIKey string `json:"api_key"`
+	SharedSecret string `json:"shared_secret"`
+	ArchiveDir string `json:"archive_dir"`
+	TagsetPrefix string `json:"tagsetprefix"`
+	VisibilityPrefix string `json:"visibilityprefix"`
+	TagReplacements map[string]map[string]string `json:"tag_replacements"`
+	BlockedTags map[string]string `json:"blocked_tags"`
+	ConvertFiles map[string][]string `json:"convert_files"`
+	TransferService *TransferService `json:"transfer_service"`
 }
 
 type TransferService struct {
-	Password string `yaml:"password"`
-	DropboxDirMapping map[string]string `yaml:"dropbox_dir_mapping"`
+	Password string `json:"password"`
+	DropboxDirMapping map[string]string `json:"dropbox_dir_mapping"`
 }
 
 func (ts TransferService) MapDropboxPath(path string) string {
@@ -45,7 +46,7 @@ func Load(filepath string) (*Config, error) {
 
 	rv := new(Config)
 
-	err = yaml.Unmarshal(bytes, rv)
+	err = json.Unmarshal(bytes, rv)
 
 	return rv, err
 }
