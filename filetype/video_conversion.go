@@ -22,6 +22,9 @@ func VideoConversionStage() func(ctx *processing.PreprocessingContext, next proc
 		conversionCmd := ctx.Config.ConvertFiles[strings.ToLower(ext)]
 
 		if conversionCmd != nil {
+
+			logrus.Infof("Converting file %s", ctx.Filepath)
+
 			out, err := convert(conversionCmd, ctx.Filepath)
 
 			if err == nil {
