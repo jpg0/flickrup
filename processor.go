@@ -66,10 +66,14 @@ func PerformRun(preprocessor processing.Preprocessor, processor processing.Proce
 
 	var result processing.ProcessingResult
 
+	restartAfterPreprocess := false
+
 	for _, toProcess := range fileInfos {
 		log.Debugf("Beginning preprocessing for %v", toProcess.Name())
 		ctx := processing.NewPreprocessingContext(config, config.WatchDir + "/" + toProcess.Name())
 		result = preprocessor(ctx)
+
+		restartAfterPreprocess = restartAfterPreprocess || ctx.RequiresRestart
 
 		switch result.ResultType {
 		case processing.SuccessResult:
@@ -81,6 +85,11 @@ func PerformRun(preprocessor processing.Preprocessor, processor processing.Proce
 			log.Infof("Restarting run after preprocessing %v", toProcess.Name())
 			return true, nil
 		}
+	}
+
+	if restartAfterPreprocess {
+		log.Infof("Restarting run after preprocessing stage")
+		return true, nil
 	}
 
 	log.Infof("Preprocessed %v files", len(fileInfos))

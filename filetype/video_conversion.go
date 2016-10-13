@@ -28,6 +28,7 @@ func VideoConversionStage() func(ctx *processing.PreprocessingContext, next proc
 			out, err := convert(conversionCmd, ctx.Filepath)
 
 			if err == nil {
+				ctx.RequiresRestart = true
 				return processing.NewSuccessResult()
 			} else {
 				logrus.Warnf("Failed to convert video file %s: %s", ctx.Filepath, out)
