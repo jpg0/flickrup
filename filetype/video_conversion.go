@@ -13,7 +13,13 @@ import (
 func VideoConversionStage() func(ctx *processing.PreprocessingContext, next processing.Preprocessor) processing.ProcessingResult {
 	return func(ctx *processing.PreprocessingContext, next processing.Preprocessor) processing.ProcessingResult {
 
-		conversionCmd := ctx.Config.ConvertFiles[strings.ToLower(filepath.Ext(ctx.Filepath))]
+		ext := filepath.Ext(ctx.Filepath)
+
+		if len(ext) > 0 {
+			ext = ext[1:]
+		}
+
+		conversionCmd := ctx.Config.ConvertFiles[strings.ToLower(ext)]
 
 		if conversionCmd != nil {
 			out, err := convert(conversionCmd, ctx.Filepath)
