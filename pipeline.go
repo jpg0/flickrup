@@ -47,9 +47,11 @@ func CreateAndRunPipeline(config *config.Config) error {
 				time.Sleep(time.Minute * 5)
 			}
 
-			for SafePerformRun(preprocessor, processor, config, completions) {
+			for SafePerformRun(preprocessor, processor, config) {
 				log.Infof("Rerunning...")
 			}
+
+			completions <- struct {}{}
 		}
 	}
 
@@ -89,8 +91,7 @@ func PreprocessorPipeline(config *flickrupconfig.Config, additionalStages ...pro
 	), nil
 }
 
-func SafePerformRun(preprocessor processing.Preprocessor, processor processing.Processor, config *config.Config, completions chan <- struct{}) bool {
-	defer func(){ completions <-struct {}{}}()
+func SafePerformRun(preprocessor processing.Preprocessor, processor processing.Processor, config *config.Config) bool {
 
 	rerun, err := PerformRun(preprocessor, processor, config)
 
