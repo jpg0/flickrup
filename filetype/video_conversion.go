@@ -29,6 +29,14 @@ func VideoConversionStage() func(ctx *processing.PreprocessingContext, next proc
 
 			if err == nil {
 				ctx.RequiresRestart = true
+
+				err = MoveFile(ctx.Filepath, os.TempDir() + "/" + filepath.Base(ctx.Filepath))
+
+				if err != nil {
+					logrus.Errorf("Failed to move converted file: %s", err)
+					return processing.NewErrorResult(errors.Trace(err))
+				}
+
 				return processing.NewSuccessResult()
 			} else {
 				logrus.Warnf("Failed to convert video file %s: %s", ctx.Filepath, out)
