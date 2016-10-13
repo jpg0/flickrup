@@ -83,13 +83,13 @@ func ProcessorPipeline(config *flickrupconfig.Config, additionalStages ...proces
 	), nil
 }
 
-func PreprocessorPipeline(config *flickrupconfig.Config, additionalStages ...processing.Stage) (processing.Processor, error) {
-	return processing.Chain(
+func PreprocessorPipeline(config *flickrupconfig.Config, additionalStages ...processing.PreStage) (processing.Preprocessor, error) {
+	return processing.ChainPreStages(
 		filetype.VideoConversionStage(),
 	), nil
 }
 
-func SafePerformRun(preprocessor processing.Processor, processor processing.Processor, config *config.Config, completions chan <- struct{}) bool {
+func SafePerformRun(preprocessor processing.Preprocessor, processor processing.Processor, config *config.Config, completions chan <- struct{}) bool {
 	defer func(){ completions <-struct {}{}}()
 
 	rerun, err := PerformRun(preprocessor, processor, config)

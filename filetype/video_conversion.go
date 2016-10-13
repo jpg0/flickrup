@@ -9,18 +9,18 @@ import (
 	"github.com/Sirupsen/logrus"
 )
 
-func VideoConversionStage() func(ctx *processing.ProcessingContext, next processing.Processor) processing.ProcessingResult {
-	return func(ctx *processing.ProcessingContext, next processing.Processor) processing.ProcessingResult {
+func VideoConversionStage() func(ctx *processing.PreprocessingContext, next processing.Preprocessor) processing.ProcessingResult {
+	return func(ctx *processing.PreprocessingContext, next processing.Preprocessor) processing.ProcessingResult {
 
-		conversionCmd := ctx.Config.ConvertFiles[filepath.Ext(ctx.File.Filepath())]
+		conversionCmd := ctx.Config.ConvertFiles[filepath.Ext(ctx.Filepath)]
 
 		if conversionCmd != nil {
-			out, err := convert(conversionCmd, ctx.File.Filepath())
+			out, err := convert(conversionCmd, ctx.Filepath)
 
 			if err == nil {
 				return processing.NewSuccessResult()
 			} else {
-				logrus.Warnf("Failed to convert video file %s: %s", ctx.File.Filepath(), out)
+				logrus.Warnf("Failed to convert video file %s: %s", ctx.Filepath, out)
 				return processing.NewErrorResult(errors.Annotate(err, "Converting video"))
 			}
 		}

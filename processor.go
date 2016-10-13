@@ -56,7 +56,7 @@ func takeWhile(files []processing.TaggedFile, f func(processing.TaggedFile) bool
 	return rv
 }
 
-func PerformRun(preprocessor processing.Processor, processor processing.Processor, config *config.Config) (bool, error) {
+func PerformRun(preprocessor processing.Preprocessor, processor processing.Processor, config *config.Config) (bool, error) {
 
 	fileInfos, err := ioutil.ReadDir(config.WatchDir)
 
@@ -64,19 +64,11 @@ func PerformRun(preprocessor processing.Processor, processor processing.Processo
 		return false, errors.Trace(err)
 	}
 
-	log.Infof("Processing %v files", len(fileInfos))
-
-	//TODO: file conversion
-
-	files := LoadFiles(fileInfos, TaggedFileFactory(), config)
-
-	log.Infof("Scanned %v files", len(files))
-
 	var result processing.ProcessingResult
 
-	for _, toProcess := range files {
+	for _, toProcess := range fileInfos {
 		log.Debugf("Beginning preprocessing for %v", toProcess.Name())
-		ctx := processing.NewProcessingContext(config, toProcess)
+		ctx := processing.NewPreprocessingContext(config, config.WatchDir + "/" + toProcess.Name())
 		result = preprocessor(ctx)
 
 		switch result.ResultType {
@@ -91,7 +83,13 @@ func PerformRun(preprocessor processing.Processor, processor processing.Processo
 		}
 	}
 
-	log.Infof("Preprocessed %v files", len(files))
+	log.Infof("Preprocessed %v files", len(fileInfos))
+
+	log.Infof("Processing %v files", len(fileInfos))
+
+	files := LoadFiles(fileInfos, TaggedFileFactory(), config)
+
+	log.Infof("Scanned %v files", len(files))
 
 	sort.Sort(ByDateTaken(files))
 
