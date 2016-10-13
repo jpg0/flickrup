@@ -7,12 +7,13 @@ import (
 	"os"
 	"github.com/juju/errors"
 	"github.com/Sirupsen/logrus"
+	"strings"
 )
 
 func VideoConversionStage() func(ctx *processing.PreprocessingContext, next processing.Preprocessor) processing.ProcessingResult {
 	return func(ctx *processing.PreprocessingContext, next processing.Preprocessor) processing.ProcessingResult {
 
-		conversionCmd := ctx.Config.ConvertFiles[filepath.Ext(ctx.Filepath)]
+		conversionCmd := ctx.Config.ConvertFiles[strings.ToLower(filepath.Ext(ctx.Filepath))]
 
 		if conversionCmd != nil {
 			out, err := convert(conversionCmd, ctx.Filepath)
