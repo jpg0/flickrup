@@ -6,6 +6,7 @@ import (
 	"github.com/juju/errors"
 	"strings"
 	"encoding/json"
+	"github.com/Sirupsen/logrus"
 )
 
 type Config struct {
@@ -47,6 +48,10 @@ func Load(filepath string) (*Config, error) {
 	rv := new(Config)
 
 	err = json.Unmarshal(bytes, rv)
+
+	if err != nil {
+		logrus.Debugf("Loaded config %s", filepath)
+	}
 
 	return rv, err
 }
