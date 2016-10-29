@@ -10,9 +10,13 @@ import (
 	"strings"
 	"github.com/jpg0/dropbox"
 	"github.com/juju/errors"
-	"github.com/jpg0/flickrup/config"
-	"gopkg.in/yaml.v2"
 	"github.com/Sirupsen/logrus"
+)
+
+const (
+	B  int64 = 1
+	KB          = B << 10
+	MB          = KB << 10
 )
 
 type Validations struct {
@@ -60,19 +64,6 @@ func DropboxDir() (string, error) {
 	return dbc.Personal.Path, nil
 }
 
-func DT() {
-	dbc := &config.Config{
-		TransferService: &config.TransferService{
-			Password:"test",
-			DropboxDirMapping:map[string]string {"a": "b"},
-		},
-	}
-
-	b, _ := yaml.Marshal(dbc)
-
-	fmt.Println(string(b))
-}
-
 func Transfer(filepath string, tags []string, isPublic bool, isFamily bool, isFriend bool, servicePassword string) (string, error) {
 
 	file, err := os.Open(filepath)
@@ -82,6 +73,18 @@ func Transfer(filepath string, tags []string, isPublic bool, isFamily bool, isFr
 	}
 
 	defer file.Close()
+
+	stat, err := file.Stat()
+
+	if err != nil {
+		return "", err
+	}
+
+	size := stat.Size()
+
+	if size > 10 * MB {
+		return "", errors.New("Not transferring file > 10MB")
+	}
 
 	root, err := DropboxDir()
 
@@ -95,14 +98,8 @@ func Transfer(filepath string, tags []string, isPublic bool, isFamily bool, isFr
 
 	title := filepath[len(root):]
 
-	stat, err := file.Stat()
-
-	if err != nil {
-		return "", err
-	}
 
 	mtime := dropbox.DBTime(stat.ModTime())
-	size := stat.Size()
 
 	transferRequest := &TransferRequest{
 		Title: title,
