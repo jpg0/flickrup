@@ -22,7 +22,7 @@ func UpdateStatus(message string, dir string) (err error) {
 }
 
 func WriteStatus(message string, dir string) (err error) {
-	file, err := os.OpenFile(fmt.Sprintf("%s%s%s", dir, os.PathSeparator, sanitize.BaseName(message)), os.O_RDONLY|os.O_CREATE, 0666)
+	file, err := os.OpenFile(fmt.Sprintf("%s%s%s%s", dir, os.PathSeparator, STATUS_FILE_PREFIX, sanitize.BaseName(message)), os.O_RDONLY|os.O_CREATE, 0666)
 	logrus.Debugf("Created file %s", file.Name())
 	defer file.Close()
 	return
