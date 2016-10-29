@@ -1,6 +1,8 @@
 Flickrup
 ========
 
+**Deprecated**: replaced by https://github.com/jpg0/flickrup
+
 Purpose
 -------
 
