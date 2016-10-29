@@ -110,6 +110,7 @@ func PerformRun(preprocessor processing.Preprocessor, processor processing.Proce
 		log.Info("No files selected for upload")
 		if len(files) > 0 {
 			log.Infof("Stopped on %v", files[0].Name())
+			UpdateStoppage(files[0].Name(), config)
 			return false, nil
 		}
 	} else {
@@ -135,7 +136,17 @@ func PerformRun(preprocessor processing.Preprocessor, processor processing.Proce
 
 	log.Infof("Processed %v files", len(byDate))
 
+	UpdateStoppage("", config)
+
 	return false, nil
+}
+
+func UpdateStoppage(filename string, config *config.Config) {
+	err := UpdateStatus("stopped_on_"+filename, config.WatchDir)
+
+	if err != nil {
+		log.Warnf("Failed to update status: %s", err)
+	}
 }
 
 func LoadFiles(files []os.FileInfo, factory *processing.TaggedFileFactory, config *config.Config) []processing.TaggedFile {
