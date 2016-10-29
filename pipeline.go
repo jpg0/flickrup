@@ -14,6 +14,8 @@ import (
 	"time"
 )
 
+const WAIT_TIME = time.Minute * 5
+
 func CreateAndRunPipeline(config *config.Config) error {
 	triggerChannel, err := listen.Watch(config)
 
@@ -36,19 +38,30 @@ func CreateAndRunPipeline(config *config.Config) error {
 
 	// initial run
 	log.Infof("Triggering initial run...")
-	l.Trigger()
+	l.TriggerNow()
 
 	for {
 		select {
 		case beginEvent := <-l.BeginChannel():
 
-			if beginEvent.AfterPause {
+			pause := beginEvent.AfterPause
+
+			doRun:
+			if pause {
 				log.Infof("Waiting for 5 mins...")
-				time.Sleep(time.Minute * 5)
+				time.Sleep(WAIT_TIME)
 			}
 
-			for SafePerformRun(preprocessor, processor, config) {
-				log.Infof("Rerunning...")
+			result := SafePerformRun(preprocessor, processor, config)
+
+			if result == RESULT_RERUN {
+				log.Debugf("Rerunnning")
+				pause = false
+				goto doRun
+			} else if result == RESULT_RESCHEDULE {
+				log.Debugf("Rescheduling")
+				pause = true
+				goto doRun
 			}
 
 			completions <- struct {}{}
@@ -91,7 +104,7 @@ func PreprocessorPipeline(config *flickrupconfig.Config, additionalStages ...pro
 	), nil
 }
 
-func SafePerformRun(preprocessor processing.Preprocessor, processor processing.Processor, config *config.Config) bool {
+func SafePerformRun(preprocessor processing.Preprocessor, processor processing.Processor, config *config.Config) ProcessResult {
 
 	rerun, err := PerformRun(preprocessor, processor, config)
 

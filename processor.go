@@ -11,6 +11,15 @@ import (
 	"os"
 	"sync"
 	"time"
+	"fmt"
+)
+
+type ProcessResult int
+
+const (
+	RESULT_STANDARD  ProcessResult = iota
+	RESULT_RERUN          = iota
+	RESULT_RESCHEDULE         = iota
 )
 
 func TaggedFileFactory() *processing.TaggedFileFactory {
@@ -18,6 +27,7 @@ func TaggedFileFactory() *processing.TaggedFileFactory {
 }
 
 const FILE_LOAD_CONCURRENCY = 4
+
 var MAX_TIME = time.Unix(2130578470, 0)
 
 type ByDateTaken []processing.TaggedFile
@@ -56,12 +66,15 @@ func takeWhile(files []processing.TaggedFile, f func(processing.TaggedFile) bool
 	return rv
 }
 
-func PerformRun(preprocessor processing.Preprocessor, processor processing.Processor, config *config.Config) (bool, error) {
+func PerformRun(preprocessor processing.Preprocessor, processor processing.Processor, config *config.Config) (ProcessResult, error) {
+
+	processRunTime := time.Now()
+	stableTime := processRunTime.Add(-WAIT_TIME)
 
 	fileInfos, err := ioutil.ReadDir(config.WatchDir)
 
 	if err != nil {
-		return false, errors.Trace(err)
+		return RESULT_STANDARD, errors.Trace(err)
 	}
 
 	var result processing.ProcessingResult
@@ -83,13 +96,13 @@ func PerformRun(preprocessor processing.Preprocessor, processor processing.Proce
 			log.Warn(result.Error)
 		case processing.RestartResult:
 			log.Infof("Restarting run after preprocessing %v", toProcess.Name())
-			return true, nil
+			return RESULT_RERUN, nil
 		}
 	}
 
 	if restartAfterPreprocess {
 		log.Infof("Restarting run after preprocessing stage")
-		return true, nil
+		return RESULT_RERUN, nil
 	}
 
 	log.Infof("Preprocessed %v files", len(fileInfos))
@@ -111,7 +124,7 @@ func PerformRun(preprocessor processing.Preprocessor, processor processing.Proce
 		if len(files) > 0 {
 			log.Infof("Stopped on %v", files[0].Name())
 			UpdateStoppage(files[0].Name(), config)
-			return false, nil
+			return RESULT_STANDARD, nil
 		}
 	} else {
 		log.Infof("Selected %v files for upload", len(byDate))
@@ -119,6 +132,20 @@ func PerformRun(preprocessor processing.Preprocessor, processor processing.Proce
 
 	for _, toProcess := range byDate {
 		log.Debugf("Beginning processing for %v", toProcess.Name())
+
+		fileInto, err := os.Stat(fmt.Sprintf("%v%v%v", config.WatchDir, string(os.PathSeparator), toProcess.Name()))
+
+		log.Debugf("%v > %v ? %v", fileInto.ModTime(), stableTime, fileInto.ModTime().After(stableTime))
+
+		if err != nil {
+			log.Warn("Failed to stat %v to check stabilised. Assuming stable.", toProcess.Name())
+		} else {
+			if fileInto.ModTime().After(stableTime) {
+				log.Infof("File %v recently changed, rescheduling", fileInto.Name())
+				return RESULT_RESCHEDULE, nil
+			}
+		}
+
 		ctx := processing.NewProcessingContext(config, toProcess)
 		result = processor(ctx)
 
@@ -130,7 +157,7 @@ func PerformRun(preprocessor processing.Preprocessor, processor processing.Proce
 			log.Warn(result.Error)
 		case processing.RestartResult:
 			log.Infof("Restarting run after processing %v", toProcess.Name())
-			return true, nil
+			return RESULT_RERUN, nil
 		}
 	}
 
@@ -138,11 +165,17 @@ func PerformRun(preprocessor processing.Preprocessor, processor processing.Proce
 
 	UpdateStoppage("", config)
 
-	return false, nil
+	return RESULT_STANDARD, nil
 }
 
 func UpdateStoppage(filename string, config *config.Config) {
-	err := UpdateStatus("stopped_on_"+filename, config.WatchDir)
+	var err error
+
+	if filename == "" {
+		err = ClearStatus(config.WatchDir)
+	} else {
+		err = UpdateStatus("stopped_on_" + filename, config.WatchDir)
+	}
 
 	if err != nil {
 		log.Warnf("Failed to update status: %s", err)

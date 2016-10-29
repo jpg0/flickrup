@@ -46,8 +46,12 @@ func (l *Listener) BeginChannel() <-chan BeginEvent {
 	return l.begin
 }
 
-func (l *Listener) Trigger() {
+func (l *Listener) TriggerNow() {
 	l.triggered(Requested)
+}
+
+func (l *Listener) Queue() {
+	l.triggered(Triggered)
 }
 
 //single threaded
