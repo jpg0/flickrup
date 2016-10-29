@@ -22,8 +22,8 @@ func UpdateStatus(message string, dir string) (err error) {
 }
 
 func WriteStatus(message string, dir string) (err error) {
-	file, err := os.OpenFile(fmt.Sprintf("%s%s%s%s", dir, os.PathSeparator, STATUS_FILE_PREFIX, sanitize.BaseName(message)), os.O_RDONLY|os.O_CREATE, 0666)
-	logrus.Debugf("Created file %s", file.Name())
+	file, err := os.OpenFile(fmt.Sprintf("%v%v%v%v", dir, os.PathSeparator, STATUS_FILE_PREFIX, sanitize.BaseName(message)), os.O_RDONLY|os.O_CREATE, 0666)
+	logrus.Debugf("Created file %v", file.Name())
 	defer file.Close()
 	return
 }
@@ -37,11 +37,11 @@ func ClearStatus(dir string) (err error) {
 
 	for _, file := range files {
 		if strings.HasPrefix(file.Name(), STATUS_FILE_PREFIX) {
-			err = os.Remove(fmt.Sprintf("%s%s%s", dir, os.PathSeparator, file.Name()))
+			err = os.Remove(fmt.Sprintf("%v%v%v", dir, os.PathSeparator, file.Name()))
 			if err != nil {
-				logrus.Warnf("Failed to remove file %s", file.Name())
+				logrus.Warnf("Failed to remove file %v", file.Name())
 			} else {
-				logrus.Debugf("Removed file %s", file.Name())
+				logrus.Debugf("Removed file %v", file.Name())
 			}
 		}
 	}
