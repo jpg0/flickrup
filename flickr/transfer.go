@@ -29,6 +29,7 @@ type TransferRequest struct {
 	Tags                         []string
 	IsPublic, IsFamily, IsFriend bool
 	Validations                  *Validations
+	RecentChange                 bool
 }
 
 type TransferResponse struct {
@@ -64,7 +65,7 @@ func DropboxDir() (string, error) {
 	return dbc.Personal.Path, nil
 }
 
-func Transfer(filepath string, tags []string, isPublic bool, isFamily bool, isFriend bool, servicePassword string) (string, error) {
+func Transfer(filepath string, tags []string, isPublic bool, isFamily bool, isFriend bool, recentChange bool, servicePassword string) (string, error) {
 
 	file, err := os.Open(filepath)
 
@@ -111,6 +112,7 @@ func Transfer(filepath string, tags []string, isPublic bool, isFamily bool, isFr
 			Mtime: &mtime,
 			Size: &size,
 		},
+		RecentChange: recentChange,
 	}
 
 	body, err := json.Marshal(transferRequest)

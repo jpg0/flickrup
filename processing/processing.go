@@ -13,6 +13,7 @@ type ProcessingContext struct {
 	UploadedId string
 	OverrideDateTaken time.Time
 	ArchivedAs string
+	FileUpdated bool
 }
 
 func (pc ProcessingContext) DateTakenForArchive() time.Time {
@@ -28,5 +29,6 @@ func NewProcessingContext(config *config.Config, file TaggedFile) *ProcessingCon
 		Visibilty: "public",
 		Config: config,
 		File: file,
+		FileUpdated: false,
 	}
 }

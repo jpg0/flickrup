@@ -23,6 +23,7 @@ func (rw *Rewriter) MaybeRewrite(ctx *processing.ProcessingContext) processing.P
 
 		if keyword != updated {
 			ctx.File.Keywords().Replace(keyword, updated)
+			ctx.FileUpdated = true
 		}
 	}
 

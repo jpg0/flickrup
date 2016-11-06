@@ -44,7 +44,7 @@ func (client *FlickrUploadClient) Upload(ctx *processing.ProcessingContext) proc
 	params.Tags = file.Keywords().All().Slice()
 
 	if ctx.Config.TransferService != nil {
-		id, err := Transfer(ctx.Config.TransferService.MapDropboxPath(file.Filepath()), params.Tags, params.IsPublic, params.IsFamily, params.IsFriend, ctx.Config.TransferService.Password)
+		id, err := Transfer(ctx.Config.TransferService.MapDropboxPath(file.Filepath()), params.Tags, params.IsPublic, params.IsFamily, params.IsFriend, ctx.FileUpdated, ctx.Config.TransferService.Password)
 
 		if err != nil {
 			log.Infof("Failed to transfer: %v", err)

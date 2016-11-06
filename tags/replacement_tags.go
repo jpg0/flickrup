@@ -25,6 +25,7 @@ func MaybeReplace(ctx *processing.ProcessingContext) processing.ProcessingResult
 					log.Debugf("Setting tag %v to %v", tagName, value)
 
 					err := ctx.File.ReplaceStringTag(tagName, value)
+					ctx.FileUpdated = true
 
 					if err != nil {
 						return processing.NewErrorResult(errors.Annotate(err, "Replacing string tag"))
