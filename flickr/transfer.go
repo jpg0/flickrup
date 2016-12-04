@@ -83,8 +83,8 @@ func Transfer(filepath string, tags []string, isPublic bool, isFamily bool, isFr
 
 	size := stat.Size()
 
-	if size > 10 * MB {
-		return "", errors.New("Not transferring file > 10MB")
+	if size > 100 * MB {
+		return "", errors.New("Not transferring file > 100MB")
 	}
 
 	root, err := DropboxDir()
