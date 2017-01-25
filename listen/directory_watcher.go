@@ -5,6 +5,7 @@ import (
 	"github.com/jpg0/flickrup/config"
 	log "github.com/Sirupsen/logrus"
 	"github.com/juju/errors"
+	"path/filepath"
 )
 
 func Watch(cfg *config.Config) (<-chan struct {}, error){
@@ -14,12 +15,16 @@ func Watch(cfg *config.Config) (<-chan struct {}, error){
 	}
 	c := make(chan struct{})
 
+	us := NewUploadStatus(cfg.WatchDir)
+
 	go func() {
 		for {
 			select {
-			case <-watcher.Events:
+			case e := <-watcher.Events:
 				//log.Debugf("Detected Change:", e)
-				c <- struct {}{}
+				if !us.IsStatusFile(cfg.WatchDir + string(filepath.Separator) + e.Name) {
+					c <- struct{}{}
+				}
 			case err := <-watcher.Errors:
 				log.Error("error:", err)
 			}

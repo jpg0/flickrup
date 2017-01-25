@@ -12,6 +12,7 @@ import (
 	"sync"
 	"time"
 	"fmt"
+	"github.com/jpg0/flickrup/listen"
 )
 
 type ProcessResult int
@@ -171,10 +172,12 @@ func PerformRun(preprocessor processing.Preprocessor, processor processing.Proce
 func UpdateStoppage(filename string, config *config.Config) {
 	var err error
 
+	us := listen.NewUploadStatus(config.WatchDir)
+
 	if filename == "" {
-		err = ClearStatus(config.WatchDir)
+		err = us.ClearStatus()
 	} else {
-		err = UpdateStatus("stopped_on_" + filename, config.WatchDir)
+		err = us.UpdateStatus("stopped_on_" + filename)
 	}
 
 	if err != nil {
