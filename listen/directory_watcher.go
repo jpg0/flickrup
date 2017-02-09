@@ -21,9 +21,10 @@ func Watch(cfg *config.Config) (<-chan struct {}, error){
 		for {
 			select {
 			case e := <-watcher.Events:
-				//log.Debugf("Detected Change:", e)
 				if !us.IsStatusFile(cfg.WatchDir + string(filepath.Separator) + e.Name) {
 					c <- struct{}{}
+				} else {
+					log.Debugf("Ignoring status file change: %v", e.Name)
 				}
 			case err := <-watcher.Errors:
 				log.Error("error:", err)
