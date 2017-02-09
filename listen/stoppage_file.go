@@ -20,7 +20,7 @@ func NewUploadStatus(dir string) *UploadStatus {
 }
 
 func (us *UploadStatus) IsStatusFile(path string) bool {
-	return strings.HasPrefix(path, fmt.Sprintf("%v%v", us.dir, string(os.PathSeparator)))
+	return strings.HasPrefix(path, fmt.Sprintf("%v%v%v", us.dir, string(os.PathSeparator), STATUS_FILE_PREFIX))
 }
 
 func (us *UploadStatus) UpdateStatus(message string) (err error) {
