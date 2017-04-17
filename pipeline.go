@@ -55,11 +55,11 @@ func CreateAndRunPipeline(config *config.Config) error {
 			result := SafePerformRun(preprocessor, processor, config)
 
 			if result == RESULT_RERUN {
-				log.Debugf("Rerunnning")
+				log.Infof("Rerunnning")
 				pause = false
 				goto doRun
 			} else if result == RESULT_RESCHEDULE {
-				log.Debugf("Rescheduling")
+				log.Infof("Rescheduling")
 				pause = true
 				goto doRun
 			}

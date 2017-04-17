@@ -132,11 +132,11 @@ func PerformRun(preprocessor processing.Preprocessor, processor processing.Proce
 	}
 
 	for _, toProcess := range byDate {
-		log.Debugf("Beginning processing for %v", toProcess.Name())
+		log.Infof("Beginning processing for %v", toProcess.Name())
 
 		fileInto, err := os.Stat(fmt.Sprintf("%v%v%v", config.WatchDir, string(os.PathSeparator), toProcess.Name()))
 
-		log.Debugf("%v > %v ? %v", fileInto.ModTime(), stableTime, fileInto.ModTime().After(stableTime))
+		log.Infof("%v > %v ? %v", fileInto.ModTime(), stableTime, fileInto.ModTime().After(stableTime))
 
 		if err != nil {
 			log.Warn("Failed to stat %v to check stabilised. Assuming stable.", toProcess.Name())
@@ -207,7 +207,7 @@ func LoadFiles(files []os.FileInfo, factory *processing.TaggedFileFactory, confi
 				if err != nil {
 					switch e := err.(type) {
 						case processing.NoConstructorAvailableError:
-							log.Debugf("Ignoring file %v", job.Input.Name())
+							log.Infof("Ignoring file %v", job.Input.Name())
 						default:
 							log.Warnf("Failed to load file %v, ignoring", job.Input.Name())
 							log.Warnf(e.Error())

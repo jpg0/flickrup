@@ -59,19 +59,19 @@ func (l *Listener) triggered(u Update) {
 	switch u {
 	case Triggered, Requested:
 		if l.processing {
-			log.Debug("Processing queued")
+			log.Infof("Processing queued")
 			l.queued = true
 		} else {
-			log.Debug("Processing triggered")
+			log.Infof("Processing triggered")
 			l.processing = true
 			l.begin <- BeginEvent{u == Triggered}
 		}
 	case ProcessingComplete:
 		if l.processing {
 			l.processing = false
-			log.Debug("Processing complete")
+			log.Infof("Processing complete")
 			if l.queued {
-				log.Debug("Queued processing triggered")
+				log.Infof("Queued processing triggered")
 				l.queued = false
 				l.processing = true
 				l.begin <- BeginEvent{false}

@@ -33,11 +33,11 @@ func (tsp *TagSetProcessor) Stage() processing.Stage {
 		if ctx.Visibilty != "offline" {
 			if len(sets) > 0 {
 
-				log.Debugf("Detected membership of set(s) %v", sets)
+				log.Infof("Detected membership of set(s) %v", sets)
 
 
 				for _, set := range sets {
-					log.Debugf("Adding %v to set: %v", ctx.File.Name(), set)
+					log.Infof("Adding %v to set: %v", ctx.File.Name(), set)
 					err := tsp.setClient.AddToSet(ctx.UploadedId, set, ctx.File.DateTaken())
 
 					if err != nil {

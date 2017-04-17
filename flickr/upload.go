@@ -35,7 +35,7 @@ func (client *FlickrUploadClient) Upload(ctx *processing.ProcessingContext) proc
 
 	if !AddVisibility(params, ctx) {
 		//offline
-		log.Debug("Offline visibility specified; skipping upload")
+		log.Infof("Offline visibility specified; skipping upload")
 		return processing.NewSuccessResult()
 	}
 
@@ -65,7 +65,7 @@ func (client *FlickrUploadClient) Upload(ctx *processing.ProcessingContext) proc
 		log.Errorf("Failed to upload photo %v: %v", file.Name(), response)
 		return processing.NewErrorResult(errors.New(response.ErrorMsg()))
 	} else {
-		log.Debugf("Uploaded photo %v %v as %v", file.Name(), file.Keywords().All().Slice(), response.ID)
+		log.Infof("Uploaded photo %v %v as %v", file.Name(), file.Keywords().All().Slice(), response.ID)
 		ctx.UploadedId = response.ID
 	}
 

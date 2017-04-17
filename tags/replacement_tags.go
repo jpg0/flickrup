@@ -22,7 +22,7 @@ func MaybeReplace(ctx *processing.ProcessingContext) processing.ProcessingResult
 				}
 
 				if allKeywords.Contains(tagPresent[1:]) {
-					log.Debugf("Setting tag %v to %v", tagName, value)
+					log.Infof("Setting tag %v to %v", tagName, value)
 
 					err := ctx.File.ReplaceStringTag(tagName, value)
 					ctx.FileUpdated = true
