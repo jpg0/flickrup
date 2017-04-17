@@ -1,0 +1,16 @@
+[Unit]
+Description=Flickr image uploader
+
+[Service]
+
+Environment="conf_file=/etc/flickrup.json" "log_level=INFO"
+
+Restart=on-failure
+
+User=some-user
+Group=some-user
+
+ExecStart=/usr/local/bin/flickrup --config "$conf_file" --loglevel $log_level
+
+[Install]
+WantedBy=multi-user.target

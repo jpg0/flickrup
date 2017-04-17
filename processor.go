@@ -207,7 +207,7 @@ func LoadFiles(files []os.FileInfo, factory *processing.TaggedFileFactory, confi
 				if err != nil {
 					switch e := err.(type) {
 						case processing.NoConstructorAvailableError:
-							log.Infof("Ignoring file %v", job.Input.Name())
+							log.Debugf("Ignoring file %v", job.Input.Name())
 						default:
 							log.Warnf("Failed to load file %v, ignoring", job.Input.Name())
 							log.Warnf(e.Error())
