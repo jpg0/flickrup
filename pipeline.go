@@ -84,8 +84,8 @@ func ProcessorPipeline(config *flickrupconfig.Config, additionalStages ...proces
 
 	wiredStages := []processing.Stage{
 		processing.AsStage(rewriter.MaybeRewrite),
-		processing.AsStage(tags.MaybeBlock),
 		processing.AsStage(tags.MaybeReplace),
+		processing.AsStage(tags.MaybeBlock),
 		processing.AsStage(tags.ExtractVisibility),
 		filetype.SidecarStage(),
 		client.Stage(),
