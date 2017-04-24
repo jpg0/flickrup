@@ -177,7 +177,7 @@ func UpdateStoppage(filename string, config *config.Config) {
 	if filename == "" {
 		err = us.ClearStatus()
 	} else {
-		err = us.UpdateStatus("stopped_on_" + filename)
+		err = us.UpdateStatus(filename)
 	}
 
 	if err != nil {
