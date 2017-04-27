@@ -67,7 +67,7 @@ func takeWhile(files []processing.TaggedFile, f func(processing.TaggedFile) bool
 	return rv
 }
 
-func PerformRun(preprocessor processing.Preprocessor, processor processing.Processor, config *config.Config) (ProcessResult, error) {
+func PerformRun(preprocessor processing.Preprocessor, processor processing.Processor, config *config.Config, cm *listen.ChangeManger) (ProcessResult, error) {
 
 	processRunTime := time.Now()
 	stableTime := processRunTime.Add(-WAIT_TIME)
@@ -84,7 +84,7 @@ func PerformRun(preprocessor processing.Preprocessor, processor processing.Proce
 
 	for _, toProcess := range fileInfos {
 		log.Debugf("Beginning preprocessing for %v", toProcess.Name())
-		ctx := processing.NewPreprocessingContext(config, config.WatchDir + "/" + toProcess.Name())
+		ctx := processing.NewPreprocessingContext(config, config.WatchDir + "/" + toProcess.Name(), cm)
 		result = preprocessor(ctx)
 
 		restartAfterPreprocess = restartAfterPreprocess || ctx.RequiresRestart
@@ -147,7 +147,7 @@ func PerformRun(preprocessor processing.Preprocessor, processor processing.Proce
 			}
 		}
 
-		ctx := processing.NewProcessingContext(config, toProcess)
+		ctx := processing.NewProcessingContext(config, toProcess, cm)
 		result = processor(ctx)
 
 		switch result.ResultType {

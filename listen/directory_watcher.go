@@ -8,20 +8,18 @@ import (
 	"path/filepath"
 )
 
-func Watch(cfg *config.Config) (<-chan struct {}, error){
+func Watch(cfg *config.Config, cm *ChangeManger) (<-chan struct {}, error){
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return nil, errors.Trace(err)
 	}
 	c := make(chan struct{})
 
-	us := NewUploadStatus(cfg.WatchDir)
-
 	go func() {
 		for {
 			select {
 			case e := <-watcher.Events:
-				if !us.IsStatusFile(cfg.WatchDir + string(filepath.Separator) + e.Name) {
+				if !cm.ChangeObserved(cfg.WatchDir + string(filepath.Separator) + e.Name) {
 					c <- struct{}{}
 				} else {
 					log.Debugf("Ignoring status file change: %v", e.Name)

@@ -14,6 +14,7 @@ type ProcessingContext struct {
 	OverrideDateTaken time.Time
 	ArchivedAs string
 	FileUpdated bool
+	changeSink ChangeSink
 }
 
 func (pc ProcessingContext) DateTakenForArchive() time.Time {
@@ -24,11 +25,17 @@ func (pc ProcessingContext) DateTakenForArchive() time.Time {
 	}
 }
 
-func NewProcessingContext(config *config.Config, file TaggedFile) *ProcessingContext {
+func NewProcessingContext(config *config.Config, file TaggedFile, changeSink ChangeSink) *ProcessingContext {
 	return &ProcessingContext{
 		Visibilty: "public",
 		Config: config,
 		File: file,
 		FileUpdated: false,
+		changeSink: changeSink,
 	}
+}
+
+func (pc *ProcessingContext) ExpectChange() {
+	pc.changeSink.Expect(pc.File.Filepath())
+	pc.FileUpdated = true
 }

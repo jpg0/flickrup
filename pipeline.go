@@ -17,7 +17,10 @@ import (
 const WAIT_TIME = time.Minute * 5
 
 func CreateAndRunPipeline(config *config.Config) error {
-	triggerChannel, err := listen.Watch(config)
+	us := listen.NewUploadStatus(config.WatchDir)
+	cm := listen.NewChangeManager(us)
+
+	triggerChannel, err := listen.Watch(config, cm)
 
 	if err != nil {
 		return errors.Trace(err)
@@ -52,7 +55,7 @@ func CreateAndRunPipeline(config *config.Config) error {
 				time.Sleep(WAIT_TIME)
 			}
 
-			result := SafePerformRun(preprocessor, processor, config)
+			result := SafePerformRun(preprocessor, processor, config, cm)
 
 			if result == RESULT_RERUN {
 				log.Infof("Rerunnning")
@@ -104,9 +107,9 @@ func PreprocessorPipeline(config *flickrupconfig.Config, additionalStages ...pro
 	), nil
 }
 
-func SafePerformRun(preprocessor processing.Preprocessor, processor processing.Processor, config *config.Config) ProcessResult {
+func SafePerformRun(preprocessor processing.Preprocessor, processor processing.Processor, config *config.Config, cm *listen.ChangeManger) ProcessResult {
 
-	rerun, err := PerformRun(preprocessor, processor, config)
+	rerun, err := PerformRun(preprocessor, processor, config, cm)
 
 	if err != nil {
 		log.Errorf("Run failed: ", err)
