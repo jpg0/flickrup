@@ -64,7 +64,7 @@ func (us *UploadStatus) WriteStatus(filename string) (err error) {
 	logrus.Debugf("Image decoded")
 
 	var drawImg *image.RGBA
-	if (img != nil) {
+	if (img != nil && img.Bounds() != image.ZR) {
 		drawImg = image.NewRGBA(img.Bounds())
 		draw.Draw(drawImg, img.Bounds(), img, image.Point{0,0}, draw.Src)
 	} else {
