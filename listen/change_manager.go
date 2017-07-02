@@ -37,7 +37,7 @@ type StringBag struct {
 }
 
 func NewStringBag() *StringBag {
-	return &StringBag{}
+	return &StringBag{items: make(map[string]int)}
 }
 
 func (sb *StringBag) Add(s string) {
