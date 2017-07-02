@@ -74,7 +74,7 @@ func (us *UploadStatus) WriteStatus(filename string) (err error) {
 	col := color.RGBA{255, 0, 255, 255}
 
 	var x = 10 //img.Bounds().Size().X / 2
-	var y = img.Bounds().Size().Y / 2
+	var y = drawImg.Bounds().Size().Y / 2
 
 	point := fixed.P(x, y)
 
