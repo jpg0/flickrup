@@ -3,13 +3,11 @@ package listen
 import "github.com/Sirupsen/logrus"
 
 type ChangeManger struct {
-	us       *UploadStatus
 	expected *StringBag
 }
 
-func NewChangeManager(us *UploadStatus) *ChangeManger {
+func NewChangeManager() *ChangeManger {
 	return &ChangeManger{
-		us: us,
 		expected: NewStringBag(),
 	}
 }

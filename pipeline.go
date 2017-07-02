@@ -17,8 +17,8 @@ import (
 const WAIT_TIME = time.Minute * 5
 
 func CreateAndRunPipeline(config *config.Config) error {
-	us := listen.NewUploadStatus(config.WatchDir)
-	cm := listen.NewChangeManager(us)
+	//us := listen.NewUploadStatus(config.WatchDir)
+	cm := listen.NewChangeManager()
 
 	triggerChannel, err := listen.Watch(config, cm)
 

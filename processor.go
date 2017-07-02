@@ -124,7 +124,7 @@ func PerformRun(preprocessor processing.Preprocessor, processor processing.Proce
 		log.Info("No files selected for upload")
 		if len(files) > 0 {
 			log.Infof("Stopped on %v", files[0].Name())
-			UpdateStoppage(files[0].Name(), config)
+			UpdateStoppage(files[0].Name(), config, cm)
 			return RESULT_STANDARD, nil
 		}
 	} else {
@@ -164,15 +164,15 @@ func PerformRun(preprocessor processing.Preprocessor, processor processing.Proce
 
 	log.Infof("Processed %v files", len(byDate))
 
-	UpdateStoppage("", config)
+	UpdateStoppage("", config, nil)
 
 	return RESULT_STANDARD, nil
 }
 
-func UpdateStoppage(filename string, config *config.Config) {
+func UpdateStoppage(filename string, config *config.Config, cm *listen.ChangeManger) {
 	var err error
 
-	us := listen.NewUploadStatus(config.WatchDir)
+	us := listen.NewUploadStatus(config.WatchDir, cm)
 
 	if filename == "" {
 		err = us.ClearStatus()

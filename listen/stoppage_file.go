@@ -26,10 +26,11 @@ var font_files = [...]string{
 
 type UploadStatus struct {
 	dir string
+	cm *ChangeManger
 }
 
-func NewUploadStatus(dir string) *UploadStatus {
-	return &UploadStatus{dir:dir}
+func NewUploadStatus(dir string, cm *ChangeManger) *UploadStatus {
+	return &UploadStatus{dir:dir, cm:cm}
 }
 
 func (us *UploadStatus) IsStatusFile(path string) bool {
@@ -103,6 +104,8 @@ func (us *UploadStatus) WriteStatus(filename string) (err error) {
 	if err := jpeg.Encode(fout, drawImg, &jpeg.Options{Quality:10}); err != nil {
 		logrus.Error(err)
 	}
+
+	us.cm.Expect(fout.Name())
 
 	logrus.Debugf("Created file %v", fout.Name())
 	return
