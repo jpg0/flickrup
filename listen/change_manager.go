@@ -21,7 +21,7 @@ func (cm *ChangeManger) Expect(filepath string) {
 func (cm *ChangeManger) ChangeObserved(watchDir, filepath string) bool {
 
 	if (IsStatusFile(watchDir, filepath)) {
-		return false
+		return true
 	}
 
 	removed := cm.expected.Remove(filepath)
