@@ -33,8 +33,8 @@ func NewUploadStatus(dir string, cm *ChangeManger) *UploadStatus {
 	return &UploadStatus{dir:dir, cm:cm}
 }
 
-func (us *UploadStatus) IsStatusFile(path string) bool {
-	return strings.HasPrefix(path, fmt.Sprintf("%v%v%v", us.dir, string(os.PathSeparator), STATUS_FILE_PREFIX))
+func IsStatusFile(watchDir string, path string) bool {
+	return strings.HasPrefix(path, fmt.Sprintf("%v%v%v", watchDir, string(os.PathSeparator), STATUS_FILE_PREFIX))
 }
 
 func (us *UploadStatus) UpdateStatus(filename string) (err error) {

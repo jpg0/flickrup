@@ -18,7 +18,12 @@ func (cm *ChangeManger) Expect(filepath string) {
 }
 
 //returns true iff the change was expected
-func (cm *ChangeManger) ChangeObserved(filepath string) bool {
+func (cm *ChangeManger) ChangeObserved(watchDir, filepath string) bool {
+
+	if (IsStatusFile(watchDir, filepath)) {
+		return false
+	}
+
 	removed := cm.expected.Remove(filepath)
 
 	if (removed) {
