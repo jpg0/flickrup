@@ -19,7 +19,7 @@ func Watch(cfg *config.Config, cm *ChangeManger) (<-chan struct {}, error){
 		for {
 			select {
 			case e := <-watcher.Events:
-				if !cm.ChangeObserved(cfg.WatchDir + string(filepath.Separator) + e.Name) {
+				if !cm.ChangeObserved(e.Name) {
 					log.Debugf("Observed file change: %v", e.Name)
 					c <- struct{}{}
 				} else {
