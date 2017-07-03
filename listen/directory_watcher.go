@@ -5,7 +5,6 @@ import (
 	"github.com/jpg0/flickrup/config"
 	log "github.com/Sirupsen/logrus"
 	"github.com/juju/errors"
-	"path/filepath"
 )
 
 func Watch(cfg *config.Config, cm *ChangeManger) (<-chan struct {}, error){
