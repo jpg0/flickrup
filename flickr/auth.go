@@ -7,8 +7,8 @@ import (
 	"bufio"
 	"os"
 	"strings"
-	"gopkg.in/masci/flickr.v2"
 	"github.com/juju/errors"
+	"github.com/jpg0/flickr"
 )
 
 func getToken(client *flickr.FlickrClient) (*flickr.OAuthToken, error) {

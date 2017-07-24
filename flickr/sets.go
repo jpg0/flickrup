@@ -2,10 +2,10 @@ package flickr
 
 import (
 	"time"
-	"gopkg.in/masci/flickr.v2"
-	"gopkg.in/masci/flickr.v2/photosets"
-	"gopkg.in/masci/flickr.v2/photos"
 	"errors"
+	"github.com/jpg0/flickr"
+	"github.com/jpg0/flickr/photos"
+	"github.com/jpg0/flickr/photosets"
 )
 
 type SetClient interface {

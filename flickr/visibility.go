@@ -1,7 +1,7 @@
 package flickr
 
 import (
-	"gopkg.in/masci/flickr.v2"
+	"github.com/jpg0/flickr"
 	"github.com/jpg0/flickrup/processing"
 )
 
@@ -14,6 +14,9 @@ func AddVisibility(uploadParams *flickr.UploadParams, ctx *processing.Processing
 	switch visibility {
 	default:
 		panic("Unknown visibility: " + visibility)
+	case "default":
+		uploadParams.IsDefault = true
+		return true
 	case "offline":
 		return false
 	case "family":

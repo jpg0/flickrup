@@ -27,7 +27,7 @@ type Validations struct {
 type TransferRequest struct {
 	Title                        string
 	Tags                         []string
-	IsPublic, IsFamily, IsFriend bool
+	IsDefault, IsPublic, IsFamily, IsFriend bool
 	Validations                  *Validations
 	RecentChange                 bool
 }
@@ -65,7 +65,7 @@ func DropboxDir() (string, error) {
 	return dbc.Personal.Path, nil
 }
 
-func Transfer(filepath string, tags []string, isPublic bool, isFamily bool, isFriend bool, recentChange bool, servicePassword string) (string, error) {
+func Transfer(filepath string, tags []string, isDefault bool, isPublic bool, isFamily bool, isFriend bool, recentChange bool, servicePassword string) (string, error) {
 
 	file, err := os.Open(filepath)
 
@@ -104,6 +104,7 @@ func Transfer(filepath string, tags []string, isPublic bool, isFamily bool, isFr
 
 	transferRequest := &TransferRequest{
 		Title: title,
+		IsDefault: isDefault,
 		IsPublic: isPublic,
 		IsFamily: isFamily,
 		IsFriend: isFriend,

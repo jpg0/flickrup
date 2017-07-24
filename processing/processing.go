@@ -27,7 +27,7 @@ func (pc ProcessingContext) DateTakenForArchive() time.Time {
 
 func NewProcessingContext(config *config.Config, file TaggedFile, changeSink ChangeSink) *ProcessingContext {
 	return &ProcessingContext{
-		Visibilty: "public",
+		Visibilty: "default",
 		Config: config,
 		File: file,
 		FileUpdated: false,
