@@ -3,17 +3,17 @@ package tags
 import ("github.com/jpg0/flickrup/processing"
 	log "github.com/Sirupsen/logrus"
 	"github.com/jpg0/flickrup/config"
-	"github.com/jpg0/flickrup/flickr"
+	"github.com/jpg0/flickrup/flickraccess"
 	"github.com/juju/errors"
 )
 
 type TagSetProcessor struct {
-	setClient flickr.SetClient
+	setClient flickraccess.SetClient
 }
 
 func NewTagSetProcessor(config *config.Config) (*TagSetProcessor, error) {
 
-	setClient, err := flickr.NewFlickrSetClient(config.APIKey, config.SharedSecret)
+	setClient, err := flickraccess.NewFlickrSetClient(config.APIKey, config.SharedSecret)
 
 	if err != nil {
 		return nil, err

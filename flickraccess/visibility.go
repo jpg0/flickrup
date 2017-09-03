@@ -1,4 +1,4 @@
-package flickr
+package flickraccess
 
 import (
 	"github.com/jpg0/flickr"

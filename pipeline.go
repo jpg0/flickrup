@@ -9,7 +9,7 @@ import (
 	"github.com/juju/errors"
 	flickrupconfig "github.com/jpg0/flickrup/config"
 	log "github.com/Sirupsen/logrus"
-	"github.com/jpg0/flickrup/flickr"
+	"github.com/jpg0/flickrup/flickraccess"
 	"github.com/jpg0/flickrup/filetype"
 	"time"
 )
@@ -76,7 +76,7 @@ func CreateAndRunPipeline(config *config.Config) error {
 
 func ProcessorPipeline(config *flickrupconfig.Config, additionalStages ...processing.Stage) (processing.Processor, error) {
 
-	client, err := flickr.NewUploadClient(config)
+	client, err := flickraccess.NewUploadClient(config)
 
 	if err != nil {
 		return nil, errors.Trace(err)

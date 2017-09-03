@@ -1,4 +1,4 @@
-package flickr
+package flickraccess
 
 import (
 	"time"
