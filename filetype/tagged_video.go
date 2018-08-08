@@ -7,12 +7,15 @@ import (
 	"github.com/juju/errors"
 	"strings"
 	"os"
+	"github.com/jpg0/goexiftool"
+	"github.com/Sirupsen/logrus"
 )
 
 type TaggedVideo struct {
 	filepath string
 	picasaIni *PicasaIni
 	dateTaken time.Time
+	img goexiftool.Image
 }
 
 type TaggedVideoKeywords struct {
@@ -45,14 +48,26 @@ func (ti TaggedVideo) DateTaken() time.Time {
 	return ti.dateTaken
 }
 
-func (tik TaggedVideoKeywords) All() *processing.TagSet {
+func (tik TaggedVideoKeywords) All() (rv *processing.TagSet) {
 	k, err := tik.v.picasaIni.cached.GetKey("keywords")
 
 	if err != nil {
-		return processing.NewEmptyTagSet()
+		logrus.Debugf("No picasa tags loaded for %s [%s]", tik.v.filepath, err)
+		rv = processing.NewEmptyTagSet()
+	} else {
+		rv = processing.NewTagSet(k.Strings(","))
 	}
 
-	return processing.NewTagSet(k.Strings(","))
+	//and EXIF tags
+	tags, err := tik.v.img.StringSlice("Subject")
+
+	if err != nil {
+		logrus.Debugf("No exif tags loaded for %s [%s]", tik.v.filepath, err)
+	} else {
+		rv.AddAll(processing.NewTagSet(tags))
+	}
+
+	return
 }
 
 func (tik TaggedVideoKeywords) Replace(old string, new string) error {
@@ -88,10 +103,20 @@ func (tik TaggedVideo) ReplaceStringTag(old string, new string) error {
 
 func NewTaggedVideo(filepath string) (processing.TaggedFile, error) {
 
-	picasa, err := LoadPicasa(filepath)
+	picasa, picasaErr := LoadPicasa(filepath)
 
-	if err != nil {
-		return nil, errors.Annotate(err, "Reading Picasa config")
+	if picasaErr != nil {
+		logrus.Warnf("Failed to read picasa config: %s", picasaErr)
+	}
+
+	img, imgErr := goexiftool.NewImage(filepath)
+
+	if imgErr != nil {
+		logrus.Warnf("Failed to read video EXIF: %s", imgErr)
+	}
+
+	if imgErr != nil && picasaErr != nil {
+		return nil, errors.Annotate(imgErr, "Reading video EXIF")
 	}
 
 	dateTaken, err := os.Stat(filepath)
@@ -102,6 +127,7 @@ func NewTaggedVideo(filepath string) (processing.TaggedFile, error) {
 
 	return &TaggedVideo{
 		picasaIni: picasa,
+		img: img,
 		filepath: filepath,
 		dateTaken: dateTaken.ModTime(),
 	}, nil
