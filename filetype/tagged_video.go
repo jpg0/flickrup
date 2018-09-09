@@ -49,22 +49,26 @@ func (ti TaggedVideo) DateTaken() time.Time {
 }
 
 func (tik TaggedVideoKeywords) All() (rv *processing.TagSet) {
-	k, err := tik.v.picasaIni.cached.GetKey("keywords")
+	if tik.v.picasaIni != nil {
+		k, err := tik.v.picasaIni.cached.GetKey("keywords")
 
-	if err != nil {
-		logrus.Debugf("No picasa tags loaded for %s [%s]", tik.v.filepath, err)
-		rv = processing.NewEmptyTagSet()
-	} else {
-		rv = processing.NewTagSet(k.Strings(","))
+		if err != nil {
+			logrus.Debugf("No picasa tags loaded for %s [%s]", tik.v.filepath, err)
+			rv = processing.NewEmptyTagSet()
+		} else {
+			rv = processing.NewTagSet(k.Strings(","))
+		}
 	}
 
-	//and EXIF tags
-	tags, err := tik.v.img.StringSlice("Subject")
+	if tik.v.img != nil {
+		//and EXIF tags
+		tags, err := tik.v.img.StringSlice("Keywords")
 
-	if err != nil {
-		logrus.Debugf("No exif tags loaded for %s [%s]", tik.v.filepath, err)
-	} else {
-		rv.AddAll(processing.NewTagSet(tags))
+		if err != nil {
+			logrus.Debugf("No exif tags loaded for %s [%s]", tik.v.filepath, err)
+		} else {
+			rv.AddAll(processing.NewTagSet(tags))
+		}
 	}
 
 	return
@@ -112,7 +116,7 @@ func NewTaggedVideo(filepath string) (processing.TaggedFile, error) {
 	img, imgErr := goexiftool.NewImage(filepath)
 
 	if imgErr != nil {
-		logrus.Warnf("Failed to read video EXIF: %s", imgErr)
+		logrus.Warnf("Failed to read video EXIF for %s: %s", filepath, imgErr)
 	}
 
 	if imgErr != nil && picasaErr != nil {
