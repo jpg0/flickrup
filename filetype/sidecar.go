@@ -6,12 +6,17 @@ import (
 	"fmt"
 	"strings"
 	"github.com/Sirupsen/logrus"
+	"github.com/juju/errors"
 )
 
 func SidecarStage() func(ctx *processing.ProcessingContext, next processing.Processor) processing.ProcessingResult {
 	return func(ctx *processing.ProcessingContext, next processing.Processor) processing.ProcessingResult {
 
 		result := next(ctx)
+
+		if ctx.ArchivedAs == "" {
+			return processing.NewErrorResult(errors.Errorf("Cannot write sidecar to %s before archiving", ctx.File.Filepath()))
+		}
 
 		if result.ResultType != processing.SuccessResult {
 			asVideo, ok := ctx.File.(*TaggedVideo)

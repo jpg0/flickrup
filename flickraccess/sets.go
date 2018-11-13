@@ -70,7 +70,7 @@ func (client FlickrSetClient) DateOfSet(setName string) (time.Time, error) {
 		}
 
 		timeAsString := photoResponse.Photo.Dates.Taken
-		date, err = time.Parse(time.RFC3339, timeAsString)
+		date, err = time.Parse("2006-01-02 15:04:05", timeAsString)
 
 		if err != nil {
 			return time.Time{}, err

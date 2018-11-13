@@ -90,10 +90,10 @@ func ProcessorPipeline(config *flickrupconfig.Config, additionalStages ...proces
 		processing.AsStage(tags.MaybeReplace),
 		processing.AsStage(tags.MaybeBlock),
 		processing.AsStage(tags.ExtractVisibility),
-		filetype.SidecarStage(),
 		client.Stage(),
 		tagSetProcessor.Stage(),
 		processing.AsStage(archive.Archive),
+		filetype.SidecarStage(),
 	}
 
 	return processing.Chain(

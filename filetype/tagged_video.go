@@ -65,7 +65,15 @@ func (tik TaggedVideoKeywords) All() (rv *processing.TagSet) {
 		tags, err := tik.v.img.StringSlice("Keywords")
 
 		if err != nil {
-			logrus.Debugf("No exif tags loaded for %s [%s]", tik.v.filepath, err)
+			logrus.Debugf("No exif tags [Keywords] loaded for %s [%s]", tik.v.filepath, err)
+		} else {
+			rv.AddAll(processing.NewTagSet(tags))
+		}
+
+		tags, err = tik.v.img.StringSlice("Subject")
+
+		if err != nil {
+			logrus.Debugf("No exif tags [Subject] loaded for %s [%s]", tik.v.filepath, err)
 		} else {
 			rv.AddAll(processing.NewTagSet(tags))
 		}
