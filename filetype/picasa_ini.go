@@ -9,6 +9,7 @@ import (
 type PicasaIni struct {
 	ini *ini.File
 	cached *ini.Section
+	filepath string
 }
 
 func LoadPicasa(path string) (*PicasaIni, error) {
@@ -23,7 +24,7 @@ func LoadPicasa(path string) (*PicasaIni, error) {
 	return &PicasaIni{
 		ini: cfg,
 		cached: section,
+		filepath: path,
 	}, nil
 }
-
 

@@ -82,36 +82,93 @@ func (tik TaggedVideoKeywords) All() (rv *processing.TagSet) {
 	return
 }
 
-func (tik TaggedVideoKeywords) Replace(old string, new string) error {
-	k, err := tik.v.picasaIni.cached.GetKey("keywords")
+func (tik TaggedVideoKeywords) Replace(old string, new string) (err error) {
 
-	if err != nil {
-		return errors.Trace(err)
-	}
+	//first picasa ini
+	if tik.v.picasaIni != nil {
+		k, err := tik.v.picasaIni.cached.GetKey("keywords")
 
-	all := k.Strings(",")
+		if err != nil {
+			logrus.Errorf("Failed to load (& update) picasa tags for %s: %s", tik.v.filepath, err)
+		} else {
+			all := k.Strings(",")
 
-	for i, str := range all {
-		if str == old {
-			all[i] = new
+			if len(all) > 0 {
+				for i, str := range all {
+					if str == old {
+						all[i] = new
+					}
+				}
+
+				k.SetValue(strings.Join(all, ","))
+
+				err = tik.v.picasaIni.ini.SaveTo(tik.v.picasaIni.filepath)
+
+				if err != nil {
+					logrus.Errorf("Failed to update picasa tags for %s: %s", tik.v.filepath, err)
+				}
+			}
 		}
 	}
 
-	k.SetValue(strings.Join(all, ","))
+	//and exif
+	if tik.v.img != nil {
+		//and EXIF tags
+		all, err := tik.v.img.StringSlice("Keywords")
 
-	return tik.v.picasaIni.ini.SaveTo(tik.v.filepath)
-}
+		if err != nil {
+			logrus.Debugf("No exif tags [Keywords] loaded for %s [%s]", tik.v.filepath, err)
+		} else {
+			if len(all) > 0 {
+				for i, str := range all {
+					if str == old {
+						all[i] = new
+					}
+				}
 
-func (tik TaggedVideo) ReplaceStringTag(old string, new string) error {
-	k, err := tik.picasaIni.cached.GetKey(old)
+				err = tik.v.img.AddTag("Keywords", strings.Join(all, ","))
 
-	if err != nil {
-		return errors.Trace(err)
+				if err != nil {
+					logrus.Errorf("Failed to update exif tags for %s: %s", tik.v.filepath, err)
+				}
+			}
+		}
 	}
 
-	k.SetValue(new)
+	return
+}
 
-	return tik.picasaIni.ini.SaveTo(tik.filepath)}
+func (tik TaggedVideo) ReplaceStringTag(old string, new string) (err error) {
+
+	//first picasa ini
+	if tik.picasaIni != nil {
+		k, err := tik.picasaIni.cached.GetKey("keywords")
+
+		if err != nil {
+			logrus.Errorf("Failed to load (& update) picasa tags for %s: %s", tik.filepath, err)
+		} else {
+			k.SetValue(new);
+			err = tik.picasaIni.ini.SaveTo(tik.picasaIni.filepath)
+
+			if err != nil {
+				logrus.Errorf("Failed to update picasa tags for %s: %s", tik.filepath, err)
+			}
+		}
+	}
+
+	//and exif
+	if tik.img != nil {
+		//and EXIF tags
+
+		err := tik.img.AddTag("Keywords", new)
+
+		if err != nil {
+			logrus.Errorf("Failed to update exif tags for %s: %s", tik.filepath, err)
+		}
+	}
+
+	return
+}
 
 func NewTaggedVideo(filepath string) (processing.TaggedFile, error) {
 
